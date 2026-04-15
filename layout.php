@@ -3,7 +3,7 @@
 // Использование: layout_head('Заголовок страницы') и layout_foot()
 
 function layout_head(string $title = '', bool $require_auth = true): void {
-    session_start();
+    if (session_status() === PHP_SESSION_NONE) session_start();
     require_once __DIR__ . '/db.php';
 
     if ($require_auth && !isset($_SESSION['user_id'])) {

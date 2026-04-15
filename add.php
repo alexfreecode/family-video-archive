@@ -3,6 +3,7 @@ require_once __DIR__ . '/config.php';
 require_once __DIR__ . '/db.php';
 session_start();
 if (!isset($_SESSION['user_id'])) { header('Location: login.php'); exit; }
+load_language();
 
 // AJAX проверка дубликата
 if (isset($_GET['check_yt_id'])) {

@@ -4,6 +4,8 @@ require_once __DIR__ . '/db.php';
 session_start();
 if (!isset($_SESSION['user_id'])) { header('Location: login.php'); exit; }
 
+load_language();
+
 $user  = current_user();
 $notifications = get_pending_notifications($user['id']);
 
