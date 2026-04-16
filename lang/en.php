@@ -26,6 +26,7 @@ return [
     'reg_label_pass'     => 'Password',
     'reg_label_pass2'    => 'Repeat password',
     'reg_pass_min'       => 'at least 4 characters',
+    'reg_pass_min8'      => 'at least 8 characters',
     'reg_security_tip'   => '💡 <strong>Choose a simple but unique password</strong> — one you haven\'t used anywhere else. Do not enter passwords from your bank, email, or other important services here. This site is a family archive and cannot guarantee bank-level password security.',
     'reg_btn_create'     => 'Create account',
     'reg_has_account'    => 'Already have an account?',
@@ -33,7 +34,7 @@ return [
     'reg_err_invalid'    => 'Code is invalid or expired. Ask the administrator for a new one.',
     'reg_err_invalid_s'  => 'Code is invalid or expired.',
     'reg_err_fill_all'   => 'Please fill in all fields.',
-    'reg_err_pass_min'   => 'Password must be at least 4 characters.',
+    'reg_err_pass_min'   => 'Password must be at least 8 characters.',
     'reg_err_pass_match' => 'Passwords do not match.',
     'reg_err_taken'      => 'This username is already taken, choose another.',
 
@@ -50,7 +51,7 @@ return [
     'reset_back'         => '← Back to sign in',
     'reset_err_invalid'  => 'Code is invalid or expired. Ask the administrator for a new one.',
     'reset_err_invalid_s'=> 'Code is invalid or expired.',
-    'reset_err_pass_min' => 'Password must be at least 4 characters.',
+    'reset_err_pass_min' => 'Password must be at least 8 characters.',
     'reset_err_pass_match'=> 'Passwords do not match.',
 
     // Profile

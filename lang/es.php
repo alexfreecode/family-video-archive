@@ -26,6 +26,7 @@ return [
     'reg_label_pass'     => 'Contraseña',
     'reg_label_pass2'    => 'Repetir contraseña',
     'reg_pass_min'       => 'mínimo 4 caracteres',
+    'reg_pass_min8'      => 'mínimo 8 caracteres',
     'reg_security_tip'   => '💡 <strong>Elige una contraseña simple pero única</strong> — que no hayas usado en ningún otro lugar. No introduzcas aquí contraseñas de tu banco, correo u otros servicios importantes. Este sitio es un archivo familiar y no puede garantizar seguridad bancaria.',
     'reg_btn_create'     => 'Crear cuenta',
     'reg_has_account'    => '¿Ya tienes cuenta?',
@@ -33,7 +34,7 @@ return [
     'reg_err_invalid'    => 'El código no es válido o ha expirado. Pide uno nuevo al administrador.',
     'reg_err_invalid_s'  => 'El código no es válido o ha expirado.',
     'reg_err_fill_all'   => 'Por favor, rellena todos los campos.',
-    'reg_err_pass_min'   => 'La contraseña debe tener al menos 4 caracteres.',
+    'reg_err_pass_min'   => 'La contraseña debe tener al menos 8 caracteres.',
     'reg_err_pass_match' => 'Las contraseñas no coinciden.',
     'reg_err_taken'      => 'Este usuario ya está en uso, elige otro.',
 
@@ -50,7 +51,7 @@ return [
     'reset_back'         => '← Volver al inicio de sesión',
     'reset_err_invalid'  => 'El código no es válido o ha expirado. Pide uno nuevo al administrador.',
     'reset_err_invalid_s'=> 'El código no es válido o ha expirado.',
-    'reset_err_pass_min' => 'La contraseña debe tener al menos 4 caracteres.',
+    'reset_err_pass_min' => 'La contraseña debe tener al menos 8 caracteres.',
     'reset_err_pass_match'=> 'Las contraseñas no coinciden.',
 
     // Perfil

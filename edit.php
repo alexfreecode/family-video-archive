@@ -35,6 +35,7 @@ $current_ext_names = implode(', ', array_column(array_filter($current_parts, fn(
 $error = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    csrf_verify();
     $title     = trim($_POST['title'] ?? '');
     $desc      = trim($_POST['description'] ?? '');
     $atype     = $_POST['access_type'] ?? 'all';
@@ -88,6 +89,7 @@ layout_head(t('edit_title'), false);
     </div>
 
     <form method="POST">
+      <?= csrf_field() ?>
 
       <!-- Название -->
       <div class="mb-3">

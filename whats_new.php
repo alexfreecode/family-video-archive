@@ -6,6 +6,7 @@ if (!isset($_SESSION['user_id'])) { header('Location: login.php'); exit; }
 
 $user = current_user();
 if (!$user) { session_destroy(); header('Location: login.php'); exit; }
+load_language();
 
 $new = get_new_since_prev($user['id']);
 

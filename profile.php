@@ -14,13 +14,14 @@ $success = '';
 $error   = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    csrf_verify();
     if (isset($_POST['action']) && $_POST['action'] === 'change_pass') {
         $old  = $_POST['old_pass'] ?? '';
         $new  = $_POST['new_pass'] ?? '';
         $new2 = $_POST['new_pass2'] ?? '';
         if (!password_verify($old, $user['password'])) {
             $error = t('profile_err_oldpass');
-        } elseif (strlen($new) < 4) {
+        } elseif (strlen($new) < 8) {
             $error = t('profile_err_passmin');
         } elseif ($new !== $new2) {
             $error = t('profile_err_passmatch');
@@ -72,6 +73,7 @@ layout_head(t('profile_title'), false);
 
     <!-- Настройки -->
     <form method="POST">
+      <?= csrf_field() ?>
       <div style="font-size:0.75rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-muted);font-weight:600;margin-bottom:1rem">
         <?= h(t('profile_settings')) ?>
       </div>
@@ -125,6 +127,7 @@ layout_head(t('profile_title'), false);
     <div style="margin-top:1.8rem;padding-top:1.5rem;border-top:1px solid var(--border)">
       <div style="font-size:0.75rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-muted);font-weight:600;margin-bottom:1rem"><?= h(t('profile_change_pass')) ?></div>
       <form method="POST">
+        <?= csrf_field() ?>
         <input type="hidden" name="action" value="change_pass">
         <div class="mb-3">
           <label class="form-label"><?= h(t('profile_curr_pass')) ?></label>

@@ -22,6 +22,7 @@ $others = other_users($user['id']);
 $error  = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    csrf_verify();
     $title      = trim($_POST['title'] ?? '');
     $event_date = trim($_POST['event_date'] ?? '');
     $desc       = trim($_POST['description'] ?? '');
@@ -136,6 +137,7 @@ layout_head($is_new ? t('evtedit_title_new') : t('evtedit_title_edit'), false);
 
   <div class="fcard" style="max-width:620px">
     <form method="POST" enctype="multipart/form-data">
+      <?= csrf_field() ?>
 
       <div class="mb-3">
         <label class="form-label"><?= h(t('evtedit_name')) ?> <span style="color:var(--accent)">*</span></label>

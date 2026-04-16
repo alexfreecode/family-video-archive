@@ -38,6 +38,7 @@ $is_pub       = in_array(0, $access_ids);
 
 // Обработка комментариев
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    csrf_verify();
     if (isset($_POST['comment_text'])) {
         $text = trim($_POST['comment_text']);
         if ($text) {
@@ -65,8 +66,12 @@ layout_head(h($v['title']), false);
     <?php if ($is_owner): ?>
     <div style="display:flex;gap:0.5rem">
       <a href="edit.php?id=<?= $id ?>" class="btn-outline"><?= h(t('video_edit')) ?></a>
-      <a href="delete.php?id=<?= $id ?>" class="btn-danger-sm" style="display:flex;align-items:center"
-         onclick="return confirm('<?= h(addslashes(sprintf(t('video_delete_confirm'), $v['title']))) ?>')"><?= h(t('video_delete')) ?></a>
+      <form method="POST" action="delete.php" style="display:inline"
+            onsubmit="return confirm('<?= h(addslashes(sprintf(t('video_delete_confirm'), $v['title']))) ?>')">
+        <?= csrf_field() ?>
+        <input type="hidden" name="id" value="<?= $id ?>">
+        <button type="submit" class="btn-danger-sm" style="display:flex;align-items:center"><?= h(t('video_delete')) ?></button>
+      </form>
     </div>
     <?php endif; ?>
   </div>
@@ -209,6 +214,7 @@ layout_head(h($v['title']), false);
           <span style="font-size:0.72rem;color:var(--text-muted);margin-left:auto"><?= date('d.m.Y H:i', strtotime($c['created_at'])) ?></span>
           <?php if ($c['user_id'] == $current['id'] || $current['is_admin']): ?>
           <form method="POST" style="display:inline" onsubmit="return confirm('<?= h(t('comment_delete_confirm')) ?>')">
+            <?= csrf_field() ?>
             <input type="hidden" name="delete_comment_id" value="<?= $c['id'] ?>">
             <button type="submit" style="background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:0.75rem;padding:0;line-height:1" title="<?= h(t('video_delete')) ?>">✕</button>
           </form>
@@ -222,6 +228,7 @@ layout_head(h($v['title']), false);
 
     <!-- Форма добавления -->
     <form method="POST">
+      <?= csrf_field() ?>
       <div style="display:flex;gap:0.6rem;align-items:flex-start">
         <div class="avatar" style="background:<?= h($current['color']) ?>;width:32px;height:32px;font-size:0.7rem;flex-shrink:0;margin-top:2px"><?= h(initials($current['display_name'])) ?></div>
         <div style="flex:1">

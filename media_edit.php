@@ -27,6 +27,7 @@ else $current_atype = 'only_me';
 $current_uids = $current_uids ?? [];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    csrf_verify();
     $url   = trim($_POST['url'] ?? '');
     $title = trim($_POST['title'] ?? '');
     $desc  = trim($_POST['description'] ?? '');
@@ -97,6 +98,7 @@ layout_head(t('media_edit_title'), false);
     </div>
 
     <form method="POST" enctype="multipart/form-data">
+      <?= csrf_field() ?>
 
       <div class="mb-3">
         <label class="form-label"><?= h(t('media_url_label')) ?> <span style="color:var(--accent)">*</span></label>

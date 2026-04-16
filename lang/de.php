@@ -26,6 +26,7 @@ return [
     'reg_label_pass'     => 'Passwort',
     'reg_label_pass2'    => 'Passwort wiederholen',
     'reg_pass_min'       => 'mindestens 4 Zeichen',
+    'reg_pass_min8'      => 'mindestens 8 Zeichen',
     'reg_security_tip'   => '💡 <strong>Wählen Sie ein einfaches, aber einzigartiges Passwort</strong> — eines, das Sie nirgendwo sonst verwendet haben. Geben Sie hier keine Passwörter von Ihrer Bank, E-Mail oder anderen wichtigen Diensten ein. Diese Seite ist ein Familienarchiv und kann keine banksichere Passwortsicherheit garantieren.',
     'reg_btn_create'     => 'Konto erstellen',
     'reg_has_account'    => 'Bereits ein Konto?',
@@ -33,7 +34,7 @@ return [
     'reg_err_invalid'    => 'Der Code ist ungültig oder abgelaufen. Bitten Sie den Administrator um einen neuen.',
     'reg_err_invalid_s'  => 'Der Code ist ungültig oder abgelaufen.',
     'reg_err_fill_all'   => 'Bitte füllen Sie alle Felder aus.',
-    'reg_err_pass_min'   => 'Das Passwort muss mindestens 4 Zeichen lang sein.',
+    'reg_err_pass_min'   => 'Das Passwort muss mindestens 8 Zeichen lang sein.',
     'reg_err_pass_match' => 'Die Passwörter stimmen nicht überein.',
     'reg_err_taken'      => 'Dieser Benutzername ist bereits vergeben, wählen Sie einen anderen.',
 
@@ -50,7 +51,7 @@ return [
     'reset_back'         => '← Zurück zur Anmeldung',
     'reset_err_invalid'  => 'Der Code ist ungültig oder abgelaufen. Bitten Sie den Administrator um einen neuen.',
     'reset_err_invalid_s'=> 'Der Code ist ungültig oder abgelaufen.',
-    'reset_err_pass_min' => 'Das Passwort muss mindestens 4 Zeichen lang sein.',
+    'reset_err_pass_min' => 'Das Passwort muss mindestens 8 Zeichen lang sein.',
     'reset_err_pass_match'=> 'Die Passwörter stimmen nicht überein.',
 
     // Profil

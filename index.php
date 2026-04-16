@@ -46,6 +46,7 @@ if (!empty($notifications)):
     <a href="notify.php" class="btn-gold" style="white-space:nowrap"><?= h(t('index_setup_access')) ?></a>
   <?php else: ?>
     <form method="POST" action="notify.php">
+      <?= csrf_field() ?>
       <?php foreach ($notifications as $n): ?>
         <input type="hidden" name="notif_ids[]" value="<?= $n['id'] ?>">
       <?php endforeach; ?>
@@ -172,10 +173,12 @@ if (!empty($notifications)):
             <a href="video.php?id=<?= $v['id'] ?>" class="btn-gold"><?= h(t('video_details')) ?></a>
             <?php if ($is_owner): ?>
             <a href="edit.php?id=<?= $v['id'] ?>" class="btn-outline"><?= h(t('video_edit')) ?></a>
-            <a href="delete.php?id=<?= $v['id'] ?>" class="btn-danger-sm"
-               onclick="return confirm('<?= h(sprintf(t('video_delete_confirm'), addslashes($v['title']))) ?>')">
-              <?= h(t('video_delete')) ?>
-            </a>
+            <form method="POST" action="delete.php" style="display:inline"
+                  onsubmit="return confirm('<?= h(sprintf(t('video_delete_confirm'), addslashes($v['title']))) ?>')">
+              <?= csrf_field() ?>
+              <input type="hidden" name="id" value="<?= $v['id'] ?>">
+              <button type="submit" class="btn-danger-sm"><?= h(t('video_delete')) ?></button>
+            </form>
             <?php endif; ?>
           </div>
         </div>

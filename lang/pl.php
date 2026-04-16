@@ -26,6 +26,7 @@ return [
     'reg_label_pass'     => 'Hasło',
     'reg_label_pass2'    => 'Powtórz hasło',
     'reg_pass_min'       => 'minimum 4 znaki',
+    'reg_pass_min8'      => 'minimum 8 znaków',
     'reg_security_tip'   => '💡 <strong>Wymyśl proste, ale unikalne hasło</strong> — takie, którego nigdzie wcześniej nie używałeś. Nie wpisuj tutaj haseł do banku, poczty e-mail ani innych ważnych serwisów. Ta strona to rodzinne archiwum i nie możemy zagwarantować ochrony haseł na poziomie bankowym.',
     'reg_btn_create'     => 'Utwórz konto',
     'reg_has_account'    => 'Masz już konto?',
@@ -33,7 +34,7 @@ return [
     'reg_err_invalid'    => 'Kod jest nieprawidłowy lub wygasł. Poproś administratora o nowy.',
     'reg_err_invalid_s'  => 'Kod jest nieprawidłowy lub wygasł.',
     'reg_err_fill_all'   => 'Wypełnij wszystkie pola.',
-    'reg_err_pass_min'   => 'Hasło musi mieć co najmniej 4 znaki.',
+    'reg_err_pass_min'   => 'Hasło musi mieć co najmniej 8 znaków.',
     'reg_err_pass_match' => 'Hasła nie pasują do siebie.',
     'reg_err_taken'      => 'Ten login jest już zajęty, wybierz inny.',
 
@@ -50,7 +51,7 @@ return [
     'reset_back'         => '← Powrót do logowania',
     'reset_err_invalid'  => 'Kod jest nieprawidłowy lub wygasł. Poproś administratora o nowy.',
     'reset_err_invalid_s'=> 'Kod jest nieprawidłowy lub wygasł.',
-    'reset_err_pass_min' => 'Hasło musi mieć co najmniej 4 znaki.',
+    'reset_err_pass_min' => 'Hasło musi mieć co najmniej 8 znaków.',
     'reset_err_pass_match'=> 'Hasła nie pasują do siebie.',
 
     // Profil

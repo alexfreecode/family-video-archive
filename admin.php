@@ -13,6 +13,7 @@ $error   = '';
 $success = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
+    csrf_verify();
 
     if ($_POST['action'] === 'invite') {
         $color = $_POST['color'] ?? '#c9a84c';
@@ -116,6 +117,7 @@ layout_head(t('admin_title'), false);
             <?php if ($u['id'] != $user['id']): ?>
             <div style="display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap">
               <form method="POST" style="display:inline">
+                <?= csrf_field() ?>
                 <input type="hidden" name="action" value="reset_pass">
                 <input type="hidden" name="uid" value="<?= $u['id'] ?>">
                 <button type="submit" class="btn-outline" style="font-size:0.7rem;padding:0.2rem 0.6rem"><?= h(t('admin_btn_reset')) ?></button>
@@ -123,12 +125,14 @@ layout_head(t('admin_title'), false);
               <?php if ($u['is_active']): ?>
               <form method="POST" style="display:inline"
                     onsubmit="return confirm('<?= h(addslashes(sprintf(t('admin_conf_deact'), $u['display_name']))) ?>')">
+                <?= csrf_field() ?>
                 <input type="hidden" name="action" value="deactivate">
                 <input type="hidden" name="uid" value="<?= $u['id'] ?>">
                 <button type="submit" class="btn-outline" style="font-size:0.7rem;padding:0.2rem 0.6rem"><?= h(t('admin_btn_deact')) ?></button>
               </form>
               <?php else: ?>
               <form method="POST" style="display:inline">
+                <?= csrf_field() ?>
                 <input type="hidden" name="action" value="activate">
                 <input type="hidden" name="uid" value="<?= $u['id'] ?>">
                 <button type="submit" class="btn-outline" style="font-size:0.7rem;padding:0.2rem 0.6rem;color:var(--gold);border-color:var(--gold)"><?= h(t('admin_btn_act')) ?></button>
@@ -136,6 +140,7 @@ layout_head(t('admin_title'), false);
               <?php endif; ?>
               <form method="POST" style="display:inline"
                     onsubmit="return confirm('<?= h(addslashes(sprintf(t('admin_conf_del'), $u['display_name']))) ?>')">
+                <?= csrf_field() ?>
                 <input type="hidden" name="action" value="delete">
                 <input type="hidden" name="del_id" value="<?= $u['id'] ?>">
                 <button type="submit" class="btn-danger-sm"><?= h(t('admin_btn_del')) ?></button>
@@ -156,6 +161,7 @@ layout_head(t('admin_title'), false);
     <div style="font-size:0.75rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-muted);font-weight:600;margin-bottom:1.2rem"><?= h(t('admin_invite_sec')) ?></div>
 
     <form method="POST">
+      <?= csrf_field() ?>
       <input type="hidden" name="action" value="invite">
       <div class="mb-4">
         <label class="form-label"><?= h(t('admin_color_label')) ?></label>
@@ -182,6 +188,7 @@ layout_head(t('admin_title'), false);
         <span style="font-size:1.1rem;font-weight:700;letter-spacing:0.15em;color:var(--gold)"><?= h($inv['code']) ?></span>
         <span style="font-size:0.7rem;color:var(--text-muted)">до <?= date('d.m H:i', strtotime($inv['expires_at'])) ?></span>
         <form method="POST" style="margin-left:auto">
+          <?= csrf_field() ?>
           <input type="hidden" name="action" value="delete_invite">
           <input type="hidden" name="inv_id" value="<?= $inv['id'] ?>">
           <button type="submit" class="btn-danger-sm" style="padding:0.15rem 0.5rem">✕</button>

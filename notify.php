@@ -17,6 +17,7 @@ if (empty($notifications)) {
 $success = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    csrf_verify();
     // Массовое закрытие для пользователей без видео
     if (isset($_POST['notif_ids'])) {
         foreach ($_POST['notif_ids'] as $nid) {
@@ -86,6 +87,7 @@ layout_head(t('notify_title'), false);
 
     <?php if (!empty($my_videos)): ?>
     <form method="POST" id="notifyForm">
+      <?= csrf_field() ?>
       <input type="hidden" name="notif_id" value="<?= $notif['id'] ?>">
       <input type="hidden" name="new_user_id" value="<?= $notif['new_user_id'] ?>">
 
@@ -138,6 +140,7 @@ layout_head(t('notify_title'), false);
       <?= h(t('notify_no_videos')) ?>
     </div>
     <form method="POST" style="margin-top:1rem">
+      <?= csrf_field() ?>
       <input type="hidden" name="notif_id" value="<?= $notif['id'] ?>">
       <input type="hidden" name="new_user_id" value="<?= $notif['new_user_id'] ?>">
       <button type="submit" class="btn-gold"><?= h(t('notify_close')) ?></button>

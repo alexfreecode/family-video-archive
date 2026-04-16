@@ -7,6 +7,7 @@ if (!isset($_SESSION['user_id'])) {
 }
 $user = current_user();
 if (!$user) { session_destroy(); header('Location: login.php'); exit; }
+load_language();
 
 $events = get_events_for_user($user['id']);
 

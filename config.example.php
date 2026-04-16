@@ -22,3 +22,11 @@ define('SITE_NAME', 'Our Archive');
 // Нужен для автозаполнения названия и описания при добавлении видео
 // Required for auto-filling title and description when adding videos
 define('YOUTUBE_API_KEY', 'your_youtube_api_key_here');
+
+// ----- URL сайта / Site URL ----------------------------------
+// Без слэша в конце / Without trailing slash
+define('SITE_URL', 'https://your-domain.com');
+
+// ----- Секретный ключ / Secret key ---------------------------
+// Любая случайная строка / Any random string
+define('SECRET_KEY', 'change-this-to-random-string-xyz123');

@@ -41,6 +41,7 @@ $others = other_users($user['id']);
 $error  = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    csrf_verify();
     $type       = $_POST['type'] ?? 'link';
     $url        = trim($_POST['url'] ?? '');
     $title      = trim($_POST['title'] ?? '');
@@ -117,6 +118,7 @@ layout_head(t('media_add_title'), false);
 
   <div class="fcard" style="max-width:620px">
     <form method="POST" enctype="multipart/form-data">
+      <?= csrf_field() ?>
 
       <div class="mb-3">
         <label class="form-label"><?= h(t('media_type_label')) ?></label>

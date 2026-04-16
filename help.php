@@ -5,6 +5,8 @@ session_start();
 if (!isset($_SESSION['user_id'])) { header('Location: login.php'); exit; }
 
 $user = current_user();
+if (!$user) { session_destroy(); header('Location: login.php'); exit; }
+load_language();
 $admin = get_site_admin();
 $admin_name = $admin ? $admin['display_name'] : t('admin_role_admin');
 

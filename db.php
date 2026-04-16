@@ -321,17 +321,17 @@ function create_reset_code(int $user_id): string {
 // Создать уведомления для всех пользователей кроме нового
 function create_access_notifications(int $new_user_id): void {
     // Уведомления с запросом доступа — только тем у кого есть видео
-    $users_with_videos = db()->query("SELECT DISTINCT user_id FROM videos WHERE user_id != $new_user_id")->fetchAll();
+    $s1 = db()->prepare("SELECT DISTINCT user_id FROM videos WHERE user_id != ?");
+    $s1->execute([$new_user_id]);
+    $users_with_videos = $s1->fetchAll();
     $stmt = db()->prepare("INSERT IGNORE INTO access_notifications (user_id, new_user_id) VALUES (?, ?)");
     foreach ($users_with_videos as $u) {
         $stmt->execute([$u['user_id'], $new_user_id]);
     }
     // Информационные уведомления — всем остальным (без видео)
-    $users_without_videos = db()->query("
-        SELECT id FROM users
-        WHERE id != $new_user_id
-        AND id NOT IN (SELECT DISTINCT user_id FROM videos)
-    ")->fetchAll();
+    $s2 = db()->prepare("SELECT id FROM users WHERE id != ? AND id NOT IN (SELECT DISTINCT user_id FROM videos)");
+    $s2->execute([$new_user_id]);
+    $users_without_videos = $s2->fetchAll();
     $stmt2 = db()->prepare("INSERT IGNORE INTO access_notifications (user_id, new_user_id) VALUES (?, ?)");
     foreach ($users_without_videos as $u) {
         $stmt2->execute([$u['id'], $new_user_id]);
@@ -769,12 +769,38 @@ function initials(?string $name): string {
     return mb_strtoupper($ini);
 }
 
+// ─── CSRF ─────────────────────────────────────────────────────────────────────
+
+function csrf_token(): string {
+    if (session_status() === PHP_SESSION_NONE) session_start();
+    if (empty($_SESSION['csrf_token'])) {
+        $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+    }
+    return $_SESSION['csrf_token'];
+}
+
+/** Возвращает HTML hidden-поле с CSRF-токеном для вставки в формы. */
+function csrf_field(): string {
+    return '<input type="hidden" name="csrf_token" value="' . htmlspecialchars(csrf_token(), ENT_QUOTES, 'UTF-8') . '">';
+}
+
+/** Проверяет CSRF-токен в POST-запросе. При несовпадении — завершает скрипт с 403. */
+function csrf_verify(): void {
+    $token = $_POST['csrf_token'] ?? '';
+    if (!hash_equals(csrf_token(), $token)) {
+        http_response_code(403);
+        exit('Запрос отклонён (неверный CSRF-токен).');
+    }
+}
+
+// ─── Конец CSRF ────────────────────────────────────────────────────────────────
+
 // Remember me — создать токен и поставить cookie
 function create_remember_token(int $user_id): void {
     $token   = bin2hex(random_bytes(32)); // 64 символа
     $expires = date('Y-m-d H:i:s', strtotime('+30 days'));
     db()->prepare("INSERT INTO remember_tokens (user_id, token_hash, expires_at) VALUES (?, ?, ?)")
-       ->execute([$user_id, $token, $expires]);
+       ->execute([$user_id, hash('sha256', $token), $expires]);
     setcookie('remember_token', $token, [
         'expires'  => strtotime('+30 days'),
         'path'     => '/',
@@ -794,7 +820,7 @@ function check_remember_token(): bool {
         JOIN users u ON u.id = rt.user_id
         WHERE rt.token_hash = ? AND rt.expires_at > NOW()
     ");
-    $stmt->execute([$token]);
+    $stmt->execute([hash('sha256', $token)]);
     $row = $stmt->fetch();
 
     if (!$row || !$row['is_active']) return false;
@@ -805,7 +831,7 @@ function check_remember_token(): bool {
     // Обновляем срок — скользящие 30 дней
     $new_expires = date('Y-m-d H:i:s', strtotime('+30 days'));
     db()->prepare("UPDATE remember_tokens SET expires_at = ? WHERE token_hash = ?")
-       ->execute([$new_expires, $token]);
+       ->execute([$new_expires, hash('sha256', $token)]);
     setcookie('remember_token', $token, [
         'expires'  => strtotime('+30 days'),
         'path'     => '/',
@@ -820,7 +846,7 @@ function check_remember_token(): bool {
 function delete_remember_token(): void {
     $token = $_COOKIE['remember_token'] ?? '';
     if ($token) {
-        db()->prepare("DELETE FROM remember_tokens WHERE token_hash = ?")->execute([$token]);
+        db()->prepare("DELETE FROM remember_tokens WHERE token_hash = ?")->execute([hash('sha256', $token)]);
     }
     setcookie('remember_token', '', [
         'expires'  => time() - 3600,

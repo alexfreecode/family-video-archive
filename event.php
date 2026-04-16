@@ -29,6 +29,7 @@ $comments = get_event_comments($id);
 
 // Обработка комментариев
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    csrf_verify();
     if (isset($_POST['comment_text'])) {
         $text = trim($_POST['comment_text']);
         if ($text) add_event_comment($id, $user['id'], $text);
@@ -52,11 +53,12 @@ layout_head(h($event['title']), false);
     <div style="display:flex;gap:0.5rem">
       <?php if ($event['user_id'] == $user['id']): ?>
       <a href="event_edit.php?id=<?= $id ?>" class="btn-outline"><?= h(t('event_edit')) ?></a>
-      <a href="event_delete.php?id=<?= $id ?>" class="btn-danger-sm"
-         style="display:flex;align-items:center"
-         onclick="return confirm('<?= h(sprintf(t('event_delete_confirm'), addslashes($event['title']))) ?>')">
-        <?= h(t('video_delete')) ?>
-      </a>
+      <form method="POST" action="event_delete.php" style="display:inline"
+            onsubmit="return confirm('<?= h(sprintf(t('event_delete_confirm'), addslashes($event['title']))) ?>')">
+        <?= csrf_field() ?>
+        <input type="hidden" name="id" value="<?= $id ?>">
+        <button type="submit" class="btn-danger-sm" style="display:flex;align-items:center"><?= h(t('video_delete')) ?></button>
+      </form>
       <?php endif; ?>
       <a href="media_add.php?event_id=<?= $id ?>" class="btn-gold"><?= h(t('event_add_media')) ?></a>
     </div>
@@ -151,10 +153,12 @@ layout_head(h($event['title']), false);
             <a href="<?= h($m['url']) ?>" target="_blank" class="btn-gold" style="font-size:0.7rem;padding:0.25rem 0.8rem"><?= h(t('media_open')) ?></a>
             <?php if ($m['user_id'] == $user['id']): ?>
             <a href="media_edit.php?id=<?= $m['id'] ?>" class="btn-outline" style="font-size:0.7rem;padding:0.25rem 0.6rem"><?= h(t('video_edit')) ?></a>
-            <a href="media_delete.php?id=<?= $m['id'] ?>" class="btn-danger-sm"
-               onclick="return confirm('<?= h(t('media_delete_confirm')) ?>')">
-              <?= h(t('video_delete')) ?>
-            </a>
+            <form method="POST" action="media_delete.php" style="display:inline"
+                  onsubmit="return confirm('<?= h(t('media_delete_confirm')) ?>')">
+              <?= csrf_field() ?>
+              <input type="hidden" name="id" value="<?= $m['id'] ?>">
+              <button type="submit" class="btn-danger-sm"><?= h(t('video_delete')) ?></button>
+            </form>
             <?php endif; ?>
           </div>
         </div>
@@ -187,6 +191,7 @@ layout_head(h($event['title']), false);
           <span style="font-size:0.72rem;color:var(--text-muted);margin-left:auto"><?= date('d.m.Y H:i', strtotime($c['created_at'])) ?></span>
           <?php if ($c['user_id'] == $user['id'] || $user['is_admin']): ?>
           <form method="POST" style="display:inline" onsubmit="return confirm('<?= h(t('comment_delete_confirm')) ?>')">
+            <?= csrf_field() ?>
             <input type="hidden" name="delete_comment_id" value="<?= $c['id'] ?>">
             <button type="submit" style="background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:0.75rem;padding:0;line-height:1">✕</button>
           </form>
@@ -199,6 +204,7 @@ layout_head(h($event['title']), false);
     <?php endif; ?>
 
     <form method="POST">
+      <?= csrf_field() ?>
       <div style="display:flex;gap:0.6rem;align-items:flex-start">
         <div class="avatar" style="background:<?= h($user['color']) ?>;width:32px;height:32px;font-size:0.7rem;flex-shrink:0;margin-top:2px"><?= h(initials($user['display_name'])) ?></div>
         <div style="flex:1">

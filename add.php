@@ -22,6 +22,7 @@ $all_members = all_users(); // включая себя — для участни
 $error       = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    csrf_verify();
     $url       = trim($_POST['youtube_url'] ?? '');
     $title     = trim($_POST['title'] ?? '');
     $desc      = trim($_POST['description'] ?? '');
@@ -78,6 +79,7 @@ layout_head(t('add_title'), false);
 
   <div class="fcard" style="max-width:620px">
     <form method="POST" id="addForm">
+      <?= csrf_field() ?>
 
       <!-- YouTube URL -->
       <div class="mb-3">

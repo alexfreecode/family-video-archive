@@ -36,7 +36,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['reset'])) {
     if (!$user_r) {
         $error = t('reset_err_invalid_s');
         $step  = 'code';
-    } elseif (strlen($pass) < 4) {
+    } elseif (strlen($pass) < 8) {
         $error = t('reset_err_pass_min');
         $step  = 'form';
     } elseif ($pass !== $pass2) {
@@ -105,7 +105,7 @@ a { color:var(--gold); }
     <div class="mb-3">
       <label class="form-label"><?= h(t('reset_label_pass')) ?></label>
       <input type="password" name="password" class="form-control"
-             placeholder="<?= h(t('reg_pass_min')) ?>" autofocus autocomplete="new-password">
+             placeholder="<?= h(t('reg_pass_min8')) ?>" autofocus autocomplete="new-password">
     </div>
     <div class="mb-1">
       <label class="form-label"><?= h(t('reset_label_pass2')) ?></label>

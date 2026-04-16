@@ -3,10 +3,12 @@ require_once __DIR__ . '/config.php';
 require_once __DIR__ . '/db.php';
 session_start();
 if (!isset($_SESSION['user_id'])) { header('Location: login.php'); exit; }
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') { header('Location: events.php'); exit; }
+csrf_verify();
 $user = current_user();
 if (!$user) { session_destroy(); header('Location: login.php'); exit; }
 
-$id = (int)($_GET['id'] ?? 0);
+$id = (int)($_POST['id'] ?? 0);
 if (!$id) { header('Location: events.php'); exit; }
 
 $event = get_event($id);

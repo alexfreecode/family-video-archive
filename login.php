@@ -23,6 +23,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if (!$user['is_active']) {
                 $error = t('login_err_inactive');
             } else {
+                session_regenerate_id(true);
                 $_SESSION['user_id'] = $user['id'];
                 if (!empty($_POST['remember'])) {
                     create_remember_token($user['id']);

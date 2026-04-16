@@ -26,6 +26,7 @@ return [
     'reg_label_pass'     => 'Palavra-passe',
     'reg_label_pass2'    => 'Repetir palavra-passe',
     'reg_pass_min'       => 'mínimo 4 caracteres',
+    'reg_pass_min8'      => 'mínimo 8 caracteres',
     'reg_security_tip'   => '💡 <strong>Escolha uma palavra-passe simples mas única</strong> — que não tenha usado em nenhum outro lugar. Não introduza aqui palavras-passe do seu banco, e-mail ou outros serviços importantes. Este site é um arquivo familiar e não pode garantir segurança bancária.',
     'reg_btn_create'     => 'Criar conta',
     'reg_has_account'    => 'Já tem conta?',
@@ -33,7 +34,7 @@ return [
     'reg_err_invalid'    => 'O código é inválido ou expirou. Peça um novo ao administrador.',
     'reg_err_invalid_s'  => 'O código é inválido ou expirou.',
     'reg_err_fill_all'   => 'Por favor, preencha todos os campos.',
-    'reg_err_pass_min'   => 'A palavra-passe deve ter pelo menos 4 caracteres.',
+    'reg_err_pass_min'   => 'A palavra-passe deve ter pelo menos 8 caracteres.',
     'reg_err_pass_match' => 'As palavras-passe não coincidem.',
     'reg_err_taken'      => 'Este utilizador já existe, escolha outro.',
 
@@ -50,7 +51,7 @@ return [
     'reset_back'         => '← Voltar ao início de sessão',
     'reset_err_invalid'  => 'O código é inválido ou expirou. Peça um novo ao administrador.',
     'reset_err_invalid_s'=> 'O código é inválido ou expirou.',
-    'reset_err_pass_min' => 'A palavra-passe deve ter pelo menos 4 caracteres.',
+    'reset_err_pass_min' => 'A palavra-passe deve ter pelo menos 8 caracteres.',
     'reset_err_pass_match'=> 'As palavras-passe não coincidem.',
 
     // Perfil
