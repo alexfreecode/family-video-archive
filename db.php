@@ -498,7 +498,14 @@ function get_my_private_videos(int $user_id): array {
 // =============================================
 
 // Получить все доступные события для пользователя
-function get_events_for_user(int $user_id): array {
+function get_events_for_user(int $user_id, string $sort = 'event_date', string $order = 'desc'): array {
+    $sort  = in_array($sort,  ['event_date', 'added']) ? $sort  : 'event_date';
+    $order = in_array($order, ['asc', 'desc'])         ? $order : 'desc';
+    $order_sql = ($order === 'asc') ? 'ASC' : 'DESC';
+    $sort_sql  = ($sort === 'added')
+        ? "e.created_at $order_sql"
+        : "COALESCE(e.event_date, e.created_at) $order_sql";
+
     $sql = "
         SELECT e.*,
                COALESCE(u.display_name, 'Удалённый пользователь') as author_name,
@@ -520,7 +527,7 @@ function get_events_for_user(int $user_id): array {
             OR EXISTS (SELECT 1 FROM event_access ea WHERE ea.event_id = e.id AND ea.user_id = 0)
             OR EXISTS (SELECT 1 FROM event_access ea WHERE ea.event_id = e.id AND ea.user_id = :uid6)
         )
-        ORDER BY COALESCE(e.event_date, e.created_at) DESC
+        ORDER BY $sort_sql
     ";
     $stmt = db()->prepare($sql);
     $stmt->execute([

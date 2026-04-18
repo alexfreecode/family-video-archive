@@ -120,6 +120,8 @@ return [
     'sort_filmed_old'         => '📅 By filming date — oldest first',
     'sort_added_new'          => '🕐 By date added — newest first',
     'sort_added_old'          => '🕐 By date added — oldest first',
+    'sort_event_new'          => '📅 By event date — newest first',
+    'sort_event_old'          => '📅 By event date — oldest first',
     'sort_apply'              => 'Apply',
 
     // Navigation

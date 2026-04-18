@@ -9,7 +9,10 @@ $user = current_user();
 if (!$user) { session_destroy(); header('Location: login.php'); exit; }
 load_language();
 
-$events = get_events_for_user($user['id']);
+$sort  = in_array($_GET['sort']  ?? '', ['event_date', 'added']) ? $_GET['sort']  : 'event_date';
+$order = in_array($_GET['order'] ?? '', ['asc', 'desc'])        ? $_GET['order'] : 'desc';
+
+$events = get_events_for_user($user['id'], $sort, $order);
 
 require_once __DIR__ . '/layout.php';
 layout_head(t('nav_events'), false);
@@ -20,7 +23,13 @@ layout_head(t('nav_events'), false);
 <div class="main">
   <div class="sec-header">
     <div class="sec-title"><?= h(t('nav_events')) ?> <small><?= count($events) ?></small></div>
-    <a href="event_edit.php" class="btn-gold"><?= h(t('events_add')) ?></a>
+    <div style="display:flex;align-items:center;gap:0.5rem">
+      <button type="button" class="btn-outline" data-bs-toggle="modal" data-bs-target="#sortModal"
+              style="display:flex;align-items:center;gap:0.5rem">
+        <span style="font-size:1rem">⇅</span><span style="font-size:0.9rem">╱</span><span style="font-size:0.85rem">▽</span>
+      </button>
+      <a href="event_edit.php" class="btn-gold"><?= h(t('events_add')) ?></a>
+    </div>
   </div>
 
   <?php if (empty($events)): ?>
@@ -70,3 +79,67 @@ layout_head(t('nav_events'), false);
 </div>
 
 <?php layout_foot(); ?>
+
+<!-- Модальное окно сортировки -->
+<div class="modal fade" id="sortModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered" style="max-width:400px">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title"><?= h(t('sort_title')) ?></h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <form id="sortForm" method="GET" action="events.php">
+          <div style="font-size:0.72rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-muted);font-weight:600;margin-bottom:0.8rem"><?= h(t('sort_heading')) ?></div>
+
+          <div style="display:flex;flex-direction:column;gap:0.4rem;margin-bottom:1.5rem">
+            <?php
+              $opts = [
+                ['event_date', 'desc', t('sort_event_new')],
+                ['event_date', 'asc',  t('sort_event_old')],
+                ['added',      'desc', t('sort_added_new')],
+                ['added',      'asc',  t('sort_added_old')],
+              ];
+              foreach ($opts as [$s, $o, $label]):
+                $checked = ($sort === $s && $order === $o);
+            ?>
+            <label class="sort-opt <?= $checked ? 'active' : '' ?>">
+              <input type="radio" name="sort_combo" value="<?= $s ?>|<?= $o ?>" <?= $checked ? 'checked' : '' ?>>
+              <?= $label ?>
+            </label>
+            <?php endforeach; ?>
+          </div>
+
+          <input type="hidden" name="sort"  id="sort_hidden"  value="<?= h($sort) ?>">
+          <input type="hidden" name="order" id="order_hidden" value="<?= h($order) ?>">
+
+          <button type="submit" class="btn-gold" style="width:100%"><?= h(t('sort_apply')) ?></button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+.sort-opt {
+  display:flex; align-items:center; gap:0.65rem;
+  padding:0.55rem 0.9rem; border:1px solid var(--border);
+  border-radius:3px; cursor:pointer; font-size:0.85rem;
+  color:var(--text-muted); transition:all .15s; user-select:none;
+}
+.sort-opt:hover { border-color:var(--text-muted); color:var(--text); }
+.sort-opt.active { border-color:var(--gold); color:var(--text); }
+.sort-opt input[type=radio] { width:15px; height:15px; accent-color:var(--gold); flex-shrink:0; cursor:pointer; }
+</style>
+
+<script>
+document.querySelectorAll('input[name="sort_combo"]').forEach(radio => {
+  radio.addEventListener('change', function() {
+    const [s, o] = this.value.split('|');
+    document.getElementById('sort_hidden').value = s;
+    document.getElementById('order_hidden').value = o;
+    document.querySelectorAll('.sort-opt').forEach(opt => opt.classList.remove('active'));
+    this.closest('.sort-opt').classList.add('active');
+  });
+});
+</script>
