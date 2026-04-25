@@ -32,7 +32,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     csrf_verify();
     if (isset($_POST['comment_text'])) {
         $text = trim($_POST['comment_text']);
-        if ($text) add_event_comment($id, $user['id'], $text);
+        if ($text) {
+            add_event_comment($id, $user['id'], $text);
+            telegram_notify_event_comment($id, $user['id'], $text);
+        }
     }
     if (isset($_POST['delete_comment_id'])) {
         delete_event_comment((int)$_POST['delete_comment_id'], $user['id'], $user['is_admin']);

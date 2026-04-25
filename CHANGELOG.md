@@ -1,5 +1,38 @@
 # История изменений — Наш архив
 
+## [Апрель 2026] — Сессия 13
+
+### Telegram-бот — уведомления
+
+- **db.php** — новый блок функций: `telegram_enabled()`, `telegram_generate_link_token()`, `telegram_user_by_token()`, `telegram_connect()`, `telegram_disconnect()`, `telegram_send()`, `telegram_set_webhook()`, `telegram_delete_webhook()`, `telegram_get_webhook_info()`
+- **db.php** — функции рассылки уведомлений: `telegram_notify_video()`, `telegram_notify_event()`, `telegram_notify_media()`, `telegram_notify_video_comment()`, `telegram_notify_event_comment()`
+- **db.php** — функции получателей: `telegram_recipients_for_video/event/media()` — только пользователи с Telegram, имеющие доступ к сущности, кроме автора
+- **telegram_bot.php** — новый файл: обработчик webhook (/start TOKEN, /start, /stop)
+- **telegram_poll.php** — новый файл: polling через cron (защита secret-ключом), читает offset из файла, обрабатывает те же команды; интервал настраивается в панели хостинга
+- **profile.php** — раздел «Telegram-уведомления»: кнопка «Подключить» (deep-link → t.me/BOT?start=TOKEN, без ввода кодов вручную), статус подключения с датой, кнопка «Отключить»
+- **admin.php** — раздел управления ботом: режим (poll/webhook), cron-URL с ключом, статус webhook, последняя ошибка, список подключённых пользователей, кнопка «Тест»
+- **add.php** — `telegram_notify_video()` после сохранения видео
+- **event_edit.php** — `telegram_notify_event()` после создания события
+- **media_add.php** — `telegram_notify_media()` после добавления медиа
+- **video.php** — `telegram_notify_video_comment()` после сохранения комментария к видео
+- **event.php** — `telegram_notify_event_comment()` после сохранения комментария к событию
+- **config.example.php** — добавлены `TELEGRAM_BOT_TOKEN`, `TELEGRAM_BOT_USERNAME`, `TELEGRAM_MODE`, `TELEGRAM_POLL_KEY`
+- **schema.sql** — 5 новых столбцов в `users`: `telegram_chat_id`, `telegram_connected_at`, `telegram_link_code`, `telegram_link_expires`, `telegram_notify`
+- **lang/ru.php** (и en, uk, pl, es, pt, de) — добавлены ключи для Telegram-секции в профиле и в админке
+- Уведомления отправляются синхронно в момент создания контента — cron нужен только для обработки команд бота (/start, /stop)
+- При отсутствии заголовка у медиа в уведомлении показывается тип («Фото», «Альбом», «Ссылка») вместо URL
+
+### Сортировка событий
+
+- **events.php** — кнопка ⇅╱▽ и модальное окно: 4 варианта сортировки (по дате события / по дате добавления, новые/старые)
+- **db.php** — `get_events_for_user()` принимает `$sort` и `$order`, безопасная подстановка через allowlist
+
+### Исправленные баги
+
+- **layout.php** — `input[type="date"]::-webkit-calendar-picker-indicator` — иконка-календарик была невидима в Chrome в тёмной теме (тёмная на тёмном фоне); добавлен `filter: invert(1)` для тёмной темы
+
+---
+
 ## [Апрель 2026] — Сессия 12
 
 ### Безопасность

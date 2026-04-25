@@ -1066,13 +1066,72 @@ function telegram_notify_media(int $media_id, int $event_id, int $author_id): vo
     $recipients = telegram_recipients_for_media($media_id, $author_id);
     if (empty($recipients)) return;
 
-    $emoji = match($media['type']) { 'photo' => '📷', 'album' => '🖼', default => '🔗' };
-    $title = $media['title'] ?: $media['url'];
+    $emoji      = match($media['type']) { 'photo' => '📷', 'album' => '🖼', default => '🔗' };
+    $type_label = match($media['type']) { 'photo' => 'Фото', 'album' => 'Альбом', default => 'Ссылка' };
+    $title      = $media['title'] ?: $type_label;
 
     $text  = "$emoji <b>" . htmlspecialchars(mb_substr($title, 0, 80), ENT_QUOTES) . "</b>\n";
     $text .= "🎉 " . htmlspecialchars($media['event_title'], ENT_QUOTES) . "\n";
     $text .= "👤 " . htmlspecialchars($media['author_name'], ENT_QUOTES) . "\n";
     $text .= SITE_URL . "/event.php?id=" . $event_id;
+
+    foreach ($recipients as $r) {
+        telegram_send((int)$r['telegram_chat_id'], $text);
+    }
+}
+
+// Рассылает уведомление о новом комментарии к видео
+function telegram_notify_video_comment(int $video_id, int $commenter_id, string $comment_text): void {
+    if (!telegram_enabled()) return;
+    $stmt = db()->prepare("
+        SELECT v.title, COALESCE(u.display_name, '?') as commenter_name
+        FROM videos v
+        LEFT JOIN users u ON u.id = :uid
+        WHERE v.id = :vid
+    ");
+    $stmt->execute([':vid' => $video_id, ':uid' => $commenter_id]);
+    $row = $stmt->fetch();
+    if (!$row) return;
+
+    $recipients = telegram_recipients_for_video($video_id, $commenter_id);
+    if (empty($recipients)) return;
+
+    $excerpt = mb_substr($comment_text, 0, 120);
+    if (mb_strlen($comment_text) > 120) $excerpt .= '…';
+
+    $text  = "💬 <b>" . htmlspecialchars($row['title'], ENT_QUOTES) . "</b>\n";
+    $text .= "👤 " . htmlspecialchars($row['commenter_name'], ENT_QUOTES) . "\n";
+    $text .= htmlspecialchars($excerpt, ENT_QUOTES) . "\n";
+    $text .= SITE_URL . "/video.php?id=" . $video_id . "#comments";
+
+    foreach ($recipients as $r) {
+        telegram_send((int)$r['telegram_chat_id'], $text);
+    }
+}
+
+// Рассылает уведомление о новом комментарии к событию
+function telegram_notify_event_comment(int $event_id, int $commenter_id, string $comment_text): void {
+    if (!telegram_enabled()) return;
+    $stmt = db()->prepare("
+        SELECT e.title, COALESCE(u.display_name, '?') as commenter_name
+        FROM events e
+        LEFT JOIN users u ON u.id = :uid
+        WHERE e.id = :eid
+    ");
+    $stmt->execute([':eid' => $event_id, ':uid' => $commenter_id]);
+    $row = $stmt->fetch();
+    if (!$row) return;
+
+    $recipients = telegram_recipients_for_event($event_id, $commenter_id);
+    if (empty($recipients)) return;
+
+    $excerpt = mb_substr($comment_text, 0, 120);
+    if (mb_strlen($comment_text) > 120) $excerpt .= '…';
+
+    $text  = "💬 <b>" . htmlspecialchars($row['title'], ENT_QUOTES) . "</b>\n";
+    $text .= "👤 " . htmlspecialchars($row['commenter_name'], ENT_QUOTES) . "\n";
+    $text .= htmlspecialchars($excerpt, ENT_QUOTES) . "\n";
+    $text .= SITE_URL . "/event.php?id=" . $event_id . "#comments";
 
     foreach ($recipients as $r) {
         telegram_send((int)$r['telegram_chat_id'], $text);

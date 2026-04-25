@@ -296,6 +296,14 @@ body {
   box-shadow:0 0 0 2px rgba(201,168,76,.12);
 }
 .form-control::placeholder { color:var(--text-muted); opacity:.5; }
+input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(0.7);
+  cursor: pointer;
+}
+[data-theme="dark"] input[type="date"]::-webkit-calendar-picker-indicator,
+:root:not([data-theme="light"]) input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+}
 
 /* ACCESS SELECTOR */
 .access-box { background:var(--surface2); border:1px solid var(--border); border-radius:4px; padding:1rem; }

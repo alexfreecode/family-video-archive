@@ -43,6 +43,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $text = trim($_POST['comment_text']);
         if ($text) {
             add_comment($id, $current['id'], $text);
+            telegram_notify_video_comment($id, $current['id'], $text);
         }
     }
     if (isset($_POST['delete_comment_id'])) {

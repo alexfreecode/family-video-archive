@@ -141,6 +141,15 @@ layout_head(t('help_title'), false);
       <p><?= t('help_comments2') ?></p>
     </div>
 
+    <?php if (telegram_enabled()): ?>
+    <div class="help-section">
+      <div class="help-h2"><?= h(t('help_h_telegram')) ?></div>
+      <p><?= t('help_telegram1') ?></p>
+      <p><?= t('help_telegram2') ?></p>
+      <p><?= t('help_telegram3') ?></p>
+    </div>
+    <?php endif; ?>
+
     <div class="help-section" style="border-bottom:none;margin-bottom:0;padding-bottom:0">
       <div class="help-h2"><?= h(t('help_h_password')) ?></div>
       <?php if ($admin): ?>
