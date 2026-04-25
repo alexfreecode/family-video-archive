@@ -38,3 +38,15 @@ define('SECRET_KEY', 'change-this-to-random-string-xyz123');
 // If left empty — notification feature is disabled
 define('TELEGRAM_BOT_TOKEN',    '');   // Токен от @BotFather / Token from @BotFather
 define('TELEGRAM_BOT_USERNAME', '');   // Без @ / Without @, e.g.: myfamilybot
+
+// Режим работы бота / Bot mode
+// 'webhook' — Telegram сам шлёт запросы на сервер (требует открытого порта)
+// 'poll'    — сервер сам опрашивает Telegram через cron (рекомендуется для shared хостинга)
+// 'webhook' — Telegram pushes updates to your server (requires accessible endpoint)
+// 'poll'    — server polls Telegram via cron (recommended for shared hosting)
+define('TELEGRAM_MODE', 'poll');
+
+// Секретный ключ для запуска poll-скрипта через URL (cron)
+// Secret key to trigger the poll script via URL (cron)
+// Любая случайная строка / Any random string
+define('TELEGRAM_POLL_KEY', 'change-this-to-random-string');

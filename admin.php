@@ -227,43 +227,78 @@ layout_head(t('admin_title'), false);
     <div style="font-size:0.75rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-muted);font-weight:600;margin-bottom:1.2rem"><?= h(t('admin_tg_section')) ?></div>
 
     <?php
-      $webhook_url  = $tg_webhook['result']['url'] ?? '';
-      $webhook_ok   = !empty($webhook_url);
-      $expected_url = rtrim(SITE_URL, '/') . '/telegram_bot.php';
+      $webhook_url       = $tg_webhook['result']['url']               ?? '';
+      $webhook_ok        = !empty($webhook_url);
+      $webhook_err       = $tg_webhook['result']['last_error_message'] ?? '';
+      $webhook_err_date  = $tg_webhook['result']['last_error_date']    ?? 0;
+      $expected_url      = rtrim(SITE_URL, '/') . '/telegram_bot.php';
+      $tg_mode           = defined('TELEGRAM_MODE') ? TELEGRAM_MODE : 'webhook';
+      $poll_key          = defined('TELEGRAM_POLL_KEY') ? TELEGRAM_POLL_KEY : '';
+      $poll_url          = rtrim(SITE_URL, '/') . '/telegram_poll.php?key=' . urlencode($poll_key);
     ?>
 
-    <!-- Статус вебхука -->
+    <!-- Режим работы -->
     <div style="margin-bottom:1.2rem">
-      <div style="font-size:0.78rem;color:var(--text-muted);margin-bottom:0.4rem"><?= h(t('admin_tg_webhook_status')) ?></div>
-      <?php if ($webhook_ok): ?>
+      <div style="font-size:0.78rem;color:var(--text-muted);margin-bottom:0.5rem"><?= h(t('admin_tg_mode')) ?></div>
+      <?php if ($tg_mode === 'poll'): ?>
         <div style="display:flex;align-items:center;gap:0.5rem;font-size:0.85rem;color:var(--text)">
           <span style="color:#4aa55a">●</span>
-          <?= h(t('admin_tg_webhook_active')) ?>
+          <?= h(t('admin_tg_mode_poll')) ?>
         </div>
-        <div style="font-size:0.72rem;color:var(--text-muted);margin-top:0.2rem;word-break:break-all"><?= h($webhook_url) ?></div>
-        <?php if ($webhook_url !== $expected_url): ?>
-          <div style="font-size:0.72rem;color:#c9a84c;margin-top:0.3rem">⚠ <?= h(t('admin_tg_webhook_mismatch')) ?></div>
-        <?php endif; ?>
-      <?php else: ?>
-        <div style="display:flex;align-items:center;gap:0.5rem;font-size:0.85rem;color:var(--text-muted)">
-          <span style="color:#a54a4a">●</span>
-          <?= h(t('admin_tg_webhook_none')) ?>
-        </div>
-      <?php endif; ?>
-    </div>
 
-    <div style="display:flex;gap:0.6rem;flex-wrap:wrap;margin-bottom:1.5rem">
-      <form method="POST" style="display:inline">
-        <?= csrf_field() ?>
-        <input type="hidden" name="action" value="tg_set_webhook">
-        <button type="submit" class="btn-gold" style="font-size:0.82rem"><?= h(t('admin_tg_set_webhook')) ?></button>
-      </form>
-      <?php if ($webhook_ok): ?>
-      <form method="POST" style="display:inline">
-        <?= csrf_field() ?>
-        <input type="hidden" name="action" value="tg_del_webhook">
-        <button type="submit" class="btn-outline" style="font-size:0.82rem"><?= h(t('admin_tg_del_webhook')) ?></button>
-      </form>
+        <?php if ($webhook_ok): ?>
+        <!-- Вебхук ещё установлен — предупреждение -->
+        <div style="margin-top:0.6rem;padding:0.5rem 0.7rem;background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.3);border-radius:3px">
+          <div style="font-size:0.78rem;color:#c9a84c">⚠ <?= h(t('admin_tg_poll_webhook_warn')) ?></div>
+          <form method="POST" style="margin-top:0.5rem">
+            <?= csrf_field() ?>
+            <input type="hidden" name="action" value="tg_del_webhook">
+            <button type="submit" class="btn-gold" style="font-size:0.78rem"><?= h(t('admin_tg_del_webhook')) ?></button>
+          </form>
+        </div>
+        <?php else: ?>
+        <!-- Вебхук не установлен — polling готов -->
+        <div style="margin-top:0.8rem">
+          <div style="font-size:0.78rem;color:var(--text-muted);margin-bottom:0.4rem"><?= h(t('admin_tg_cron_url')) ?></div>
+          <div style="font-size:0.72rem;background:var(--surface2);padding:0.4rem 0.6rem;border-radius:3px;word-break:break-all;color:var(--text);font-family:monospace">
+            <?= h($poll_url) ?>
+          </div>
+          <div style="font-size:0.72rem;color:var(--text-muted);margin-top:0.4rem"><?= h(t('admin_tg_cron_hint')) ?></div>
+        </div>
+        <?php endif; ?>
+
+      <?php else: ?>
+        <!-- Режим webhook -->
+        <div style="display:flex;align-items:center;gap:0.5rem;font-size:0.85rem;color:var(--text)">
+          <span style="color:<?= $webhook_ok ? '#4aa55a' : '#a54a4a' ?>">●</span>
+          <?= $webhook_ok ? h(t('admin_tg_webhook_active')) : h(t('admin_tg_webhook_none')) ?>
+        </div>
+        <?php if ($webhook_ok): ?>
+          <div style="font-size:0.72rem;color:var(--text-muted);margin-top:0.2rem;word-break:break-all"><?= h($webhook_url) ?></div>
+        <?php endif; ?>
+        <?php if ($webhook_err): ?>
+          <div style="margin-top:0.5rem;padding:0.5rem 0.7rem;background:rgba(165,74,74,.12);border:1px solid rgba(165,74,74,.3);border-radius:3px">
+            <div style="font-size:0.68rem;text-transform:uppercase;letter-spacing:0.08em;color:#a54a4a;font-weight:600;margin-bottom:0.2rem"><?= h(t('admin_tg_webhook_last_err')) ?></div>
+            <div style="font-size:0.78rem;color:var(--text)"><?= h($webhook_err) ?></div>
+            <?php if ($webhook_err_date): ?>
+              <div style="font-size:0.68rem;color:var(--text-muted);margin-top:0.2rem"><?= date('d.m.Y H:i:s', $webhook_err_date) ?></div>
+            <?php endif; ?>
+          </div>
+        <?php endif; ?>
+        <div style="display:flex;gap:0.6rem;flex-wrap:wrap;margin-top:0.8rem">
+          <form method="POST" style="display:inline">
+            <?= csrf_field() ?>
+            <input type="hidden" name="action" value="tg_set_webhook">
+            <button type="submit" class="btn-gold" style="font-size:0.82rem"><?= h(t('admin_tg_set_webhook')) ?></button>
+          </form>
+          <?php if ($webhook_ok): ?>
+          <form method="POST" style="display:inline">
+            <?= csrf_field() ?>
+            <input type="hidden" name="action" value="tg_del_webhook">
+            <button type="submit" class="btn-outline" style="font-size:0.82rem"><?= h(t('admin_tg_del_webhook')) ?></button>
+          </form>
+          <?php endif; ?>
+        </div>
       <?php endif; ?>
     </div>
 

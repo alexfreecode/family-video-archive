@@ -99,6 +99,13 @@ return [
     'admin_tg_test_msg'         => 'Тестове повідомлення',
     'admin_tg_test_ok'          => 'Повідомлення надіслано %s.',
     'admin_tg_test_err'         => 'Не вдалося надіслати повідомлення.',
+    'admin_tg_mode'             => 'Режим роботи',
+    'admin_tg_mode_poll'        => 'Polling (опитування через cron)',
+    'admin_tg_mode_webhook'     => 'Webhook',
+    'admin_tg_poll_webhook_warn'=> 'Вебхук встановлено — його потрібно видалити, інакше polling не отримає оновлення',
+    'admin_tg_cron_url'         => 'URL для cron-завдання (інтервал налаштовується в панелі хостингу):',
+    'admin_tg_cron_hint'        => 'Додайте цей URL до cron з потрібним інтервалом. Команда: curl -s "URL" > /dev/null',
+    'admin_tg_webhook_last_err' => 'Остання помилка вебхука',
 
     // Сторінка події
     'event_back'            => '← Події',

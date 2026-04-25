@@ -99,6 +99,13 @@ return [
     'admin_tg_test_msg'         => 'Mensagem de teste',
     'admin_tg_test_ok'          => 'Mensagem enviada a %s.',
     'admin_tg_test_err'         => 'Falha ao enviar mensagem.',
+    'admin_tg_mode'             => 'Modo de funcionamento',
+    'admin_tg_mode_poll'        => 'Polling (sondagem por cron)',
+    'admin_tg_mode_webhook'     => 'Webhook',
+    'admin_tg_poll_webhook_warn'=> 'O webhook está ativo — remova-o, caso contrário o polling não receberá atualizações',
+    'admin_tg_cron_url'         => 'URL para tarefa cron (intervalo configurado no painel de alojamento):',
+    'admin_tg_cron_hint'        => 'Adicione este URL ao cron com o intervalo desejado. Comando: curl -s "URL" > /dev/null',
+    'admin_tg_webhook_last_err' => 'Último erro do webhook',
 
     // Página do evento
     'event_back'            => '← Eventos',

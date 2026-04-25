@@ -99,6 +99,13 @@ return [
     'admin_tg_test_msg'         => 'Wiadomość testowa',
     'admin_tg_test_ok'          => 'Wiadomość wysłana do %s.',
     'admin_tg_test_err'         => 'Nie udało się wysłać wiadomości.',
+    'admin_tg_mode'             => 'Tryb pracy',
+    'admin_tg_mode_poll'        => 'Polling (odpytywanie przez cron)',
+    'admin_tg_mode_webhook'     => 'Webhook',
+    'admin_tg_poll_webhook_warn'=> 'Webhook jest ustawiony — usuń go, inaczej polling nie otrzyma aktualizacji',
+    'admin_tg_cron_url'         => 'URL dla zadania cron (interwał konfigurowany w panelu hostingu):',
+    'admin_tg_cron_hint'        => 'Dodaj ten URL do cron z żądanym interwałem. Polecenie: curl -s "URL" > /dev/null',
+    'admin_tg_webhook_last_err' => 'Ostatni błąd webhooka',
 
     // Strona wydarzenia
     'event_back'            => '← Wydarzenia',

@@ -101,6 +101,13 @@ return [
     'admin_tg_test_msg'         => 'Тестовое сообщение',
     'admin_tg_test_ok'          => 'Сообщение отправлено пользователю %s.',
     'admin_tg_test_err'         => 'Не удалось отправить сообщение.',
+    'admin_tg_mode'             => 'Режим работы',
+    'admin_tg_mode_poll'        => 'Polling (опрос через cron)',
+    'admin_tg_mode_webhook'     => 'Webhook',
+    'admin_tg_poll_webhook_warn'=> 'Вебхук установлен — его нужно удалить, иначе polling не получит обновления',
+    'admin_tg_cron_url'         => 'URL для cron-задания (интервал настраивается в панели хостинга):',
+    'admin_tg_cron_hint'        => 'Добавьте этот URL в cron с нужным интервалом. Команда: curl -s "URL" > /dev/null',
+    'admin_tg_webhook_last_err' => 'Последняя ошибка вебхука',
 
     // Страница события
     'event_back'            => '← События',
