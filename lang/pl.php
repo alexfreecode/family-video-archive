@@ -416,6 +416,11 @@ return [
     'help_h_comments'    => 'Komentarze',
     'help_comments1'     => 'Na stronie filmu (przycisk <strong>Szczegóły</strong>), pod metadanymi jest sekcja komentarzy. Możesz napisać komentarz — zobaczą go wszyscy mający dostęp do tego filmu.',
     'help_comments2'     => 'Swój komentarz możesz usunąć klikając <strong>✕</strong> obok niego.',
+    'help_h_telegram'    => 'Powiadomienia Telegram 🔔',
+    'help_telegram1'     => 'Bot wysyła wiadomość w Telegram gdy ktoś doda nowe wideo, wydarzenie, media lub komentarz — tylko jeśli masz dostęp do tej treści.',
+    'help_telegram2'     => 'Aby połączyć: przejdź do <strong>⚙ Profil</strong> → kliknij <strong>«Połącz Telegram»</strong>. Otworzy się bot — naciśnij <strong>START</strong>. Gotowe — powiadomienia będą przychodzić natychmiast.',
+    'help_telegram3'     => 'Aby rozłączyć: kliknij <strong>«Wyłącz powiadomienia»</strong> w profilu.',
+
     'help_h_password'    => 'Zapomniane hasło',
     'help_password1'     => 'Skontaktuj się z administratorem — stworzy kod resetowania. Wpisz kod na stronie logowania → link «Zapomniałem hasła» → i ustaw nowe hasło.',
     'help_password2'     => 'Pytania i problemy — pisz do administratora 😊',

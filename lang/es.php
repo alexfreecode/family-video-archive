@@ -416,6 +416,11 @@ return [
     'help_h_comments'    => 'Comentarios',
     'help_comments1'     => 'En la página del vídeo (haz clic en <strong>Ver</strong>), debajo de los metadatos hay una sección de comentarios. Puedes escribir un comentario — todos con acceso al vídeo lo verán.',
     'help_comments2'     => 'Puedes eliminar tu propio comentario haciendo clic en <strong>✕</strong> junto a él.',
+    'help_h_telegram'    => 'Notificaciones de Telegram 🔔',
+    'help_telegram1'     => 'El bot te envía un mensaje en Telegram cuando alguien añade un nuevo vídeo, evento, media o comentario — solo si tienes acceso a ese contenido.',
+    'help_telegram2'     => 'Para conectar: ve a <strong>⚙ Perfil</strong> → haz clic en <strong>«Conectar Telegram»</strong>. Se abrirá el bot — pulsa <strong>START</strong>. Listo — las notificaciones llegarán al instante.',
+    'help_telegram3'     => 'Para desconectar: haz clic en <strong>«Desactivar notificaciones»</strong> en tu perfil.',
+
     'help_h_password'    => 'Olvidé la contraseña',
     'help_password1'     => 'Contacta al administrador — creará un código de restablecimiento. Introduce el código en la página de inicio de sesión → enlace «Olvidé la contraseña» → y establece una nueva contraseña.',
     'help_password2'     => 'Preguntas y problemas — contacta al administrador 😊',

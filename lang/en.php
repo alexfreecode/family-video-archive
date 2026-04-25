@@ -416,6 +416,11 @@ return [
     'help_h_comments'    => 'Comments',
     'help_comments1'     => 'On the video page (click <strong>Details</strong>), below the metadata there is a comments section. You can write a comment — everyone with access to the video will see it.',
     'help_comments2'     => 'You can delete your own comment by clicking <strong>✕</strong> next to it.',
+    'help_h_telegram'    => 'Telegram notifications 🔔',
+    'help_telegram1'     => 'The bot sends you a Telegram message when someone adds a new video, event, media, or comment — only if you have access to that content.',
+    'help_telegram2'     => 'To connect: go to <strong>⚙ Profile</strong> → click <strong>«Connect Telegram»</strong>. The bot will open — press <strong>START</strong>. Done — notifications will arrive instantly.',
+    'help_telegram3'     => 'To disconnect: click <strong>«Disable notifications»</strong> in your profile.',
+
     'help_h_password'    => 'Forgot password',
     'help_password1'     => 'Contact the administrator — they will create a reset code. Enter the code on the login page → «Forgot password» link → and set a new password.',
     'help_password2'     => 'Questions and issues — contact the administrator 😊',

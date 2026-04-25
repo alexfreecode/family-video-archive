@@ -416,6 +416,11 @@ return [
     'help_h_comments'    => 'Kommentare',
     'help_comments1'     => 'Auf der Videoseite (klicken Sie auf <strong>Ansehen</strong>), unterhalb der Metadaten gibt es einen Kommentarbereich. Sie können einen Kommentar schreiben — alle mit Zugang zum Video werden ihn sehen.',
     'help_comments2'     => 'Sie können Ihren eigenen Kommentar löschen, indem Sie auf <strong>✕</strong> daneben klicken.',
+    'help_h_telegram'    => 'Telegram-Benachrichtigungen 🔔',
+    'help_telegram1'     => 'Der Bot sendet Ihnen eine Telegram-Nachricht, wenn jemand ein neues Video, Event, Medium oder einen Kommentar hinzufügt — nur wenn Sie Zugriff auf diesen Inhalt haben.',
+    'help_telegram2'     => 'So verbinden: Gehen Sie zu <strong>⚙ Profil</strong> → klicken Sie auf <strong>«Telegram verbinden»</strong>. Der Bot öffnet sich — drücken Sie <strong>START</strong>. Fertig — Benachrichtigungen kommen sofort.',
+    'help_telegram3'     => 'So trennen: Klicken Sie in Ihrem Profil auf <strong>«Benachrichtigungen deaktivieren»</strong>.',
+
     'help_h_password'    => 'Passwort vergessen',
     'help_password1'     => 'Wenden Sie sich an den Administrator — er erstellt einen Rücksetzcode. Geben Sie den Code auf der Anmeldeseite ein → Link «Passwort vergessen» → und legen Sie ein neues Passwort fest.',
     'help_password2'     => 'Fragen und Probleme — wenden Sie sich an den Administrator 😊',
