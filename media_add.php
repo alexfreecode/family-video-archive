@@ -96,6 +96,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $stmt = db()->prepare("INSERT INTO media_access (media_id, user_id) VALUES (?,?)");
                 foreach ($uids as $uid) $stmt->execute([$media_id, (int)$uid]);
             }
+            telegram_notify_media((int)$media_id, $event_id, $user['id']);
             header('Location: event.php?id=' . $event_id);
             exit;
         }

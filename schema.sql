@@ -1,6 +1,6 @@
 -- =============================================
 --  Наш архив — схема базы данных
---  Актуально на: апрель 2026
+--  Актуально на: апрель 2026 (сессия 13)
 -- =============================================
 
 -- Миграция: добавить поле language (если обновляетесь с предыдущей версии)
@@ -8,7 +8,7 @@
 --
 -- Для новой установки поле уже включено в CREATE TABLE ниже.
 
-CREATE TABLE IF NOT EXISTS `users` (
+CREATE TABLE `users` (
   `id`            int(11)      NOT NULL AUTO_INCREMENT,
   `username`      varchar(60)  NOT NULL,
   `display_name`  varchar(100) NOT NULL,
@@ -21,14 +21,19 @@ CREATE TABLE IF NOT EXISTS `users` (
   `reset_code`    varchar(10)  DEFAULT NULL,
   `reset_expires` datetime     DEFAULT NULL,
   `is_active`     tinyint(1)   NOT NULL DEFAULT 1,
-  `last_seen`     datetime     DEFAULT NULL,
-  `prev_seen`     datetime     DEFAULT NULL,
+  `last_seen`              datetime     DEFAULT NULL,
+  `prev_seen`              datetime     DEFAULT NULL,
+  `telegram_chat_id`       bigint(20)   DEFAULT NULL,
+  `telegram_notify`        tinyint(1)   NOT NULL DEFAULT 1,
+  `telegram_connected_at`  datetime     DEFAULT NULL,
+  `telegram_link_code`     varchar(32)  DEFAULT NULL,
+  `telegram_link_expires`  datetime     DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `username` (`username`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 
-CREATE TABLE IF NOT EXISTS `videos` (
+CREATE TABLE `videos` (
   `id`          int(11)      NOT NULL AUTO_INCREMENT,
   `user_id`     int(11)      NOT NULL,
   `youtube_id`  varchar(20)  NOT NULL,
@@ -47,7 +52,7 @@ CREATE TABLE IF NOT EXISTS `videos` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 
-CREATE TABLE IF NOT EXISTS `video_access` (
+CREATE TABLE `video_access` (
   `video_id` int(11) NOT NULL,
   `user_id`  int(11) NOT NULL,
   PRIMARY KEY (`video_id`, `user_id`),
@@ -55,7 +60,7 @@ CREATE TABLE IF NOT EXISTS `video_access` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 
-CREATE TABLE IF NOT EXISTS `video_participants` (
+CREATE TABLE `video_participants` (
   `id`       int(11)      NOT NULL AUTO_INCREMENT,
   `video_id` int(11)      NOT NULL,
   `user_id`  int(11)      DEFAULT NULL,
@@ -66,7 +71,7 @@ CREATE TABLE IF NOT EXISTS `video_participants` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 
-CREATE TABLE IF NOT EXISTS `events` (
+CREATE TABLE `events` (
   `id`          int(11)      NOT NULL AUTO_INCREMENT,
   `user_id`     int(11)      NOT NULL,
   `title`       varchar(255) NOT NULL,
@@ -80,7 +85,7 @@ CREATE TABLE IF NOT EXISTS `events` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 
-CREATE TABLE IF NOT EXISTS `event_access` (
+CREATE TABLE `event_access` (
   `event_id` int(11) NOT NULL,
   `user_id`  int(11) NOT NULL,
   PRIMARY KEY (`event_id`, `user_id`),
@@ -88,7 +93,7 @@ CREATE TABLE IF NOT EXISTS `event_access` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 
-CREATE TABLE IF NOT EXISTS `media` (
+CREATE TABLE `media` (
   `id`          int(11)      NOT NULL AUTO_INCREMENT,
   `event_id`    int(11)      NOT NULL,
   `user_id`     int(11)      NOT NULL,
@@ -105,7 +110,7 @@ CREATE TABLE IF NOT EXISTS `media` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 
-CREATE TABLE IF NOT EXISTS `media_access` (
+CREATE TABLE `media_access` (
   `media_id` int(11) NOT NULL,
   `user_id`  int(11) NOT NULL,
   PRIMARY KEY (`media_id`, `user_id`),
@@ -113,7 +118,7 @@ CREATE TABLE IF NOT EXISTS `media_access` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 
-CREATE TABLE IF NOT EXISTS `event_comments` (
+CREATE TABLE `event_comments` (
   `id`         int(11)  NOT NULL AUTO_INCREMENT,
   `event_id`   int(11)  NOT NULL,
   `user_id`    int(11)  NOT NULL,
@@ -126,7 +131,7 @@ CREATE TABLE IF NOT EXISTS `event_comments` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 
-CREATE TABLE IF NOT EXISTS `invite_codes` (
+CREATE TABLE `invite_codes` (
   `id`         int(11)     NOT NULL AUTO_INCREMENT,
   `code`       varchar(10) NOT NULL,
   `color`      varchar(7)  NOT NULL DEFAULT '#c9a84c',
@@ -138,7 +143,7 @@ CREATE TABLE IF NOT EXISTS `invite_codes` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 
-CREATE TABLE IF NOT EXISTS `access_notifications` (
+CREATE TABLE `access_notifications` (
   `id`          int(11)  NOT NULL AUTO_INCREMENT,
   `user_id`     int(11)  NOT NULL,
   `new_user_id` int(11)  NOT NULL,
@@ -151,7 +156,7 @@ CREATE TABLE IF NOT EXISTS `access_notifications` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 
-CREATE TABLE IF NOT EXISTS `comments` (
+CREATE TABLE `comments` (
   `id`         int(11)  NOT NULL AUTO_INCREMENT,
   `video_id`   int(11)  NOT NULL,
   `user_id`    int(11)  NOT NULL,
@@ -165,7 +170,7 @@ CREATE TABLE IF NOT EXISTS `comments` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 
-CREATE TABLE IF NOT EXISTS `remember_tokens` (
+CREATE TABLE `remember_tokens` (
   `id`         int(11)      NOT NULL AUTO_INCREMENT,
   `user_id`    int(11)      NOT NULL,
   `token_hash` varchar(64)  NOT NULL,
@@ -191,35 +196,42 @@ CREATE TABLE IF NOT EXISTS `remember_tokens` (
 -- ALTER TABLE `videos` ADD COLUMN `tags` varchar(500) DEFAULT NULL;
 
 -- [ВЫПОЛНЕНО] Участники видео:
--- CREATE TABLE IF NOT EXISTS `video_participants` ( ... )
+-- CREATE TABLE `video_participants` ( ... )
 
 -- [ВЫПОЛНЕНО] Инвайт-коды и сброс пароля:
--- CREATE TABLE IF NOT EXISTS `invite_codes` ( ... )
+-- CREATE TABLE `invite_codes` ( ... )
 -- ALTER TABLE `users` ADD COLUMN `reset_code` varchar(10) DEFAULT NULL;
 -- ALTER TABLE `users` ADD COLUMN `reset_expires` datetime DEFAULT NULL;
 
 -- [ВЫПОЛНЕНО] Уведомления при добавлении пользователя:
--- CREATE TABLE IF NOT EXISTS `access_notifications` ( ... )
+-- CREATE TABLE `access_notifications` ( ... )
 
 -- [ВЫПОЛНЕНО] Деактивация пользователей:
 -- ALTER TABLE `users` ADD COLUMN `is_active` tinyint(1) NOT NULL DEFAULT 1;
 
 -- [ВЫПОЛНЕНО] Remember me:
--- CREATE TABLE IF NOT EXISTS `remember_tokens` ( ... )
+-- CREATE TABLE `remember_tokens` ( ... )
 -- ALTER TABLE `remember_tokens` ADD UNIQUE KEY `token_hash` (`token_hash`);
 
 -- [ВЫПОЛНЕНО] Комментарии к видео:
--- CREATE TABLE IF NOT EXISTS `comments` ( ... )
+-- CREATE TABLE `comments` ( ... )
 
 -- [ВЫПОЛНЕНО] Даты посещения:
 -- ALTER TABLE `users` ADD COLUMN `last_seen` datetime DEFAULT NULL;
 -- ALTER TABLE `users` ADD COLUMN `prev_seen` datetime DEFAULT NULL;
 
+-- [ВЫПОЛНЕНО] Telegram-бот:
+-- ALTER TABLE `users` ADD COLUMN `telegram_chat_id`      bigint(20)  DEFAULT NULL;
+-- ALTER TABLE `users` ADD COLUMN `telegram_notify`       tinyint(1)  NOT NULL DEFAULT 1;
+-- ALTER TABLE `users` ADD COLUMN `telegram_connected_at` datetime    DEFAULT NULL;
+-- ALTER TABLE `users` ADD COLUMN `telegram_link_code`    varchar(32) DEFAULT NULL;
+-- ALTER TABLE `users` ADD COLUMN `telegram_link_expires` datetime    DEFAULT NULL;
+
 -- [ВЫПОЛНЕНО] Система событий:
--- CREATE TABLE IF NOT EXISTS `events` ( ... )
--- CREATE TABLE IF NOT EXISTS `event_access` ( ... )
--- CREATE TABLE IF NOT EXISTS `media` ( ... )
--- CREATE TABLE IF NOT EXISTS `media_access` ( ... )
--- CREATE TABLE IF NOT EXISTS `event_comments` ( ... )
+-- CREATE TABLE `events` ( ... )
+-- CREATE TABLE `event_access` ( ... )
+-- CREATE TABLE `media` ( ... )
+-- CREATE TABLE `media_access` ( ... )
+-- CREATE TABLE `event_comments` ( ... )
 -- ALTER TABLE `videos` ADD COLUMN `event_id` int(11) DEFAULT NULL;
 -- ALTER TABLE `videos` ADD CONSTRAINT `videos_event_fk` FOREIGN KEY (`event_id`) REFERENCES `events` (`id`) ON DELETE SET NULL;

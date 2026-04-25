@@ -97,6 +97,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                    ->execute([$user['id'], $title, $event_date ?: null, $desc ?: null, $thumbnail]);
                 $new_id = (int)db()->lastInsertId();
                 save_event_access($new_id, $atype, $uids);
+                telegram_notify_event($new_id, $user['id']);
                 header('Location: event.php?id=' . $new_id);
             } else {
                 db()->prepare("UPDATE events SET title=?, event_date=?, description=?, thumbnail=? WHERE id=?")

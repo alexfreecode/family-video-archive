@@ -54,10 +54,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         db()->prepare("DELETE FROM invite_codes WHERE id=?")->execute([$inv_id]);
         $success = t('admin_ok_inv_del');
     }
+
+    if ($_POST['action'] === 'tg_set_webhook' && telegram_enabled()) {
+        $res = telegram_set_webhook();
+        $success = $res['ok'] ? t('admin_tg_webhook_set_ok') : (t('admin_tg_webhook_set_err') . ': ' . ($res['description'] ?? ''));
+    }
+
+    if ($_POST['action'] === 'tg_del_webhook' && telegram_enabled()) {
+        $res = telegram_delete_webhook();
+        $success = $res['ok'] ? t('admin_tg_webhook_del_ok') : t('admin_tg_webhook_del_err');
+    }
+
+    if ($_POST['action'] === 'tg_test' && telegram_enabled()) {
+        $uid = (int)($_POST['uid'] ?? 0);
+        $stmt = db()->prepare("SELECT telegram_chat_id, display_name FROM users WHERE id=? AND telegram_chat_id IS NOT NULL");
+        $stmt->execute([$uid]);
+        $u = $stmt->fetch();
+        if ($u) {
+            $ok = telegram_send((int)$u['telegram_chat_id'], "🔔 " . t('admin_tg_test_msg') . " — " . SITE_NAME);
+            $success = $ok ? sprintf(t('admin_tg_test_ok'), $u['display_name']) : t('admin_tg_test_err');
+        }
+    }
 }
 
 $users        = all_users();
 $invite_codes = get_invite_codes();
+$tg_webhook   = telegram_enabled() ? telegram_get_webhook_info() : null;
 $palette      = ['#c9a84c','#4a7fa5','#a5704a','#7a4aa5','#4aa55a','#a54a4a','#4aa5a5','#a5a54a','#d4682a','#6a8a4a'];
 
 require_once __DIR__ . '/layout.php';
@@ -198,6 +220,83 @@ layout_head(t('admin_title'), false);
     </div>
     <?php endif; ?>
   </div>
+
+  <!-- Telegram-бот -->
+  <?php if (telegram_enabled()): ?>
+  <div class="fcard" style="max-width:560px;margin-bottom:1.5rem">
+    <div style="font-size:0.75rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-muted);font-weight:600;margin-bottom:1.2rem"><?= h(t('admin_tg_section')) ?></div>
+
+    <?php
+      $webhook_url  = $tg_webhook['result']['url'] ?? '';
+      $webhook_ok   = !empty($webhook_url);
+      $expected_url = rtrim(SITE_URL, '/') . '/telegram_bot.php';
+    ?>
+
+    <!-- Статус вебхука -->
+    <div style="margin-bottom:1.2rem">
+      <div style="font-size:0.78rem;color:var(--text-muted);margin-bottom:0.4rem"><?= h(t('admin_tg_webhook_status')) ?></div>
+      <?php if ($webhook_ok): ?>
+        <div style="display:flex;align-items:center;gap:0.5rem;font-size:0.85rem;color:var(--text)">
+          <span style="color:#4aa55a">●</span>
+          <?= h(t('admin_tg_webhook_active')) ?>
+        </div>
+        <div style="font-size:0.72rem;color:var(--text-muted);margin-top:0.2rem;word-break:break-all"><?= h($webhook_url) ?></div>
+        <?php if ($webhook_url !== $expected_url): ?>
+          <div style="font-size:0.72rem;color:#c9a84c;margin-top:0.3rem">⚠ <?= h(t('admin_tg_webhook_mismatch')) ?></div>
+        <?php endif; ?>
+      <?php else: ?>
+        <div style="display:flex;align-items:center;gap:0.5rem;font-size:0.85rem;color:var(--text-muted)">
+          <span style="color:#a54a4a">●</span>
+          <?= h(t('admin_tg_webhook_none')) ?>
+        </div>
+      <?php endif; ?>
+    </div>
+
+    <div style="display:flex;gap:0.6rem;flex-wrap:wrap;margin-bottom:1.5rem">
+      <form method="POST" style="display:inline">
+        <?= csrf_field() ?>
+        <input type="hidden" name="action" value="tg_set_webhook">
+        <button type="submit" class="btn-gold" style="font-size:0.82rem"><?= h(t('admin_tg_set_webhook')) ?></button>
+      </form>
+      <?php if ($webhook_ok): ?>
+      <form method="POST" style="display:inline">
+        <?= csrf_field() ?>
+        <input type="hidden" name="action" value="tg_del_webhook">
+        <button type="submit" class="btn-outline" style="font-size:0.82rem"><?= h(t('admin_tg_del_webhook')) ?></button>
+      </form>
+      <?php endif; ?>
+    </div>
+
+    <!-- Подключённые пользователи -->
+    <?php
+      $tg_users = array_filter($users, fn($u) => !empty($u['telegram_chat_id']));
+    ?>
+    <div style="font-size:0.75rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-muted);font-weight:600;margin-bottom:0.8rem">
+      <?= h(t('admin_tg_users')) ?> (<?= count($tg_users) ?>)
+    </div>
+    <?php if (empty($tg_users)): ?>
+      <div style="font-size:0.85rem;color:var(--text-muted)"><?= h(t('admin_tg_no_users')) ?></div>
+    <?php else: ?>
+      <?php foreach ($tg_users as $u): ?>
+      <div style="display:flex;align-items:center;gap:0.7rem;margin-bottom:0.6rem">
+        <div class="avatar" style="background:<?= h($u['color']) ?>;width:28px;height:28px;font-size:0.65rem"><?= h(initials($u['display_name'])) ?></div>
+        <div style="flex:1">
+          <div style="font-size:0.85rem;color:var(--text)"><?= h($u['display_name']) ?></div>
+          <?php if (!empty($u['telegram_connected_at'])): ?>
+            <div style="font-size:0.7rem;color:var(--text-muted)"><?= date('d.m.Y H:i', strtotime($u['telegram_connected_at'])) ?></div>
+          <?php endif; ?>
+        </div>
+        <form method="POST" style="display:inline">
+          <?= csrf_field() ?>
+          <input type="hidden" name="action" value="tg_test">
+          <input type="hidden" name="uid" value="<?= $u['id'] ?>">
+          <button type="submit" class="btn-outline" style="font-size:0.72rem;padding:0.2rem 0.6rem"><?= h(t('admin_tg_test_btn')) ?></button>
+        </form>
+      </div>
+      <?php endforeach; ?>
+    <?php endif; ?>
+  </div>
+  <?php endif; ?>
 
 </div>
 

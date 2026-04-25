@@ -13,9 +13,22 @@ load_language();
 $success = '';
 $error   = '';
 
+// Генерация токена и редирект в Telegram (GET, защищён проверкой сессии)
+if (isset($_GET['action']) && $_GET['action'] === 'telegram_link' && telegram_enabled()) {
+    $token = telegram_generate_link_token($user['id']);
+    $bot   = defined('TELEGRAM_BOT_USERNAME') ? TELEGRAM_BOT_USERNAME : '';
+    header('Location: https://t.me/' . $bot . '?start=' . $token);
+    exit;
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     csrf_verify();
-    if (isset($_POST['action']) && $_POST['action'] === 'change_pass') {
+
+    if (isset($_POST['action']) && $_POST['action'] === 'telegram_disconnect') {
+        telegram_disconnect($user['id']);
+        $success = t('tg_disconnected');
+        $user = current_user();
+    } elseif (isset($_POST['action']) && $_POST['action'] === 'change_pass') {
         $old  = $_POST['old_pass'] ?? '';
         $new  = $_POST['new_pass'] ?? '';
         $new2 = $_POST['new_pass2'] ?? '';
@@ -29,7 +42,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             db()->prepare("UPDATE users SET password=? WHERE id=?")->execute([password_hash($new, PASSWORD_DEFAULT), $user['id']]);
             $success = t('profile_ok_pass');
         }
-    } else {
+    } elseif (!isset($_POST['action'])) {
         $theme = $_POST['theme'] ?? 'dark';
         save_user_theme($user['id'], $theme);
         $lang  = $_POST['language'] ?? 'ru';
@@ -122,6 +135,44 @@ layout_head(t('profile_title'), false);
 
       <button type="submit" class="btn-gold"><?= h(t('profile_btn_save')) ?></button>
     </form>
+
+    <!-- Telegram -->
+    <?php if (telegram_enabled()): ?>
+    <div style="margin-top:1.8rem;padding-top:1.5rem;border-top:1px solid var(--border)">
+      <div style="font-size:0.75rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-muted);font-weight:600;margin-bottom:1rem">
+        <?= h(t('tg_section')) ?>
+      </div>
+      <?php if ($user['telegram_chat_id']): ?>
+        <div style="display:flex;align-items:center;gap:0.8rem;margin-bottom:1rem">
+          <span style="font-size:1.3rem">✅</span>
+          <div>
+            <div style="font-size:0.9rem;color:var(--text)"><?= h(t('tg_connected')) ?></div>
+            <?php if ($user['telegram_connected_at']): ?>
+            <div style="font-size:0.75rem;color:var(--text-muted)"><?= date('d.m.Y H:i', strtotime($user['telegram_connected_at'])) ?></div>
+            <?php endif; ?>
+          </div>
+        </div>
+        <form method="POST">
+          <?= csrf_field() ?>
+          <input type="hidden" name="action" value="telegram_disconnect">
+          <button type="submit" class="btn-outline" style="font-size:0.85rem">
+            <?= h(t('tg_disconnect_btn')) ?>
+          </button>
+        </form>
+      <?php else: ?>
+        <div style="font-size:0.85rem;color:var(--text-muted);margin-bottom:1rem">
+          <?= h(t('tg_not_connected')) ?>
+        </div>
+        <a href="profile.php?action=telegram_link" class="btn-gold" style="display:inline-flex;align-items:center;gap:0.5rem;text-decoration:none">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.248l-2.007 9.456c-.148.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12L7.26 14.4l-2.95-.924c-.641-.2-.654-.641.136-.953l11.527-4.444c.533-.194 1.002.13.59.17z"/></svg>
+          <?= h(t('tg_connect_btn')) ?>
+        </a>
+        <div style="font-size:0.75rem;color:var(--text-muted);margin-top:0.6rem">
+          <?= h(t('tg_connect_hint')) ?>
+        </div>
+      <?php endif; ?>
+    </div>
+    <?php endif; ?>
 
     <!-- Смена пароля -->
     <div style="margin-top:1.8rem;padding-top:1.5rem;border-top:1px solid var(--border)">

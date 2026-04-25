@@ -862,3 +862,219 @@ function delete_remember_token(): void {
         'samesite' => 'Lax',
     ]);
 }
+
+// =============================================
+//  Telegram
+// =============================================
+
+function telegram_enabled(): bool {
+    return defined('TELEGRAM_BOT_TOKEN') && TELEGRAM_BOT_TOKEN !== '';
+}
+
+// Генерирует токен для deep-link подключения (действует 24 часа)
+function telegram_generate_link_token(int $user_id): string {
+    $token   = bin2hex(random_bytes(16)); // 32 символа — вписывается в лимит 64
+    $expires = date('Y-m-d H:i:s', time() + 86400);
+    db()->prepare("UPDATE users SET telegram_link_code=?, telegram_link_expires=? WHERE id=?")
+       ->execute([$token, $expires, $user_id]);
+    return $token;
+}
+
+// Находит пользователя по токену (проверяет срок)
+function telegram_user_by_token(string $token): ?array {
+    $stmt = db()->prepare("SELECT * FROM users WHERE telegram_link_code=? AND telegram_link_expires > NOW()");
+    $stmt->execute([$token]);
+    return $stmt->fetch() ?: null;
+}
+
+// Сохраняет chat_id и очищает токен
+function telegram_connect(int $user_id, int $chat_id): void {
+    db()->prepare("UPDATE users SET telegram_chat_id=?, telegram_connected_at=NOW(), telegram_link_code=NULL, telegram_link_expires=NULL WHERE id=?")
+       ->execute([$chat_id, $user_id]);
+}
+
+// Отключает Telegram от аккаунта
+function telegram_disconnect(int $user_id): void {
+    db()->prepare("UPDATE users SET telegram_chat_id=NULL, telegram_connected_at=NULL WHERE id=?")
+       ->execute([$user_id]);
+}
+
+// Отправляет сообщение через Bot API
+function telegram_send(int $chat_id, string $text): bool {
+    if (!telegram_enabled()) return false;
+    $url  = 'https://api.telegram.org/bot' . TELEGRAM_BOT_TOKEN . '/sendMessage';
+    $data = http_build_query([
+        'chat_id'                  => $chat_id,
+        'text'                     => $text,
+        'parse_mode'               => 'HTML',
+        'disable_web_page_preview' => false,
+    ]);
+    $ctx = stream_context_create(['http' => [
+        'method'  => 'POST',
+        'header'  => 'Content-Type: application/x-www-form-urlencoded',
+        'content' => $data,
+        'timeout' => 5,
+    ]]);
+    return @file_get_contents($url, false, $ctx) !== false;
+}
+
+// Устанавливает вебхук
+function telegram_set_webhook(): array {
+    if (!telegram_enabled()) return ['ok' => false, 'description' => 'Bot not configured'];
+    $webhook_url = rtrim(SITE_URL, '/') . '/telegram_bot.php';
+    $url  = 'https://api.telegram.org/bot' . TELEGRAM_BOT_TOKEN . '/setWebhook';
+    $data = http_build_query(['url' => $webhook_url]);
+    $ctx  = stream_context_create(['http' => [
+        'method'  => 'POST',
+        'header'  => 'Content-Type: application/x-www-form-urlencoded',
+        'content' => $data,
+        'timeout' => 10,
+    ]]);
+    $result = @file_get_contents($url, false, $ctx);
+    return $result ? json_decode($result, true) : ['ok' => false, 'description' => 'Request failed'];
+}
+
+// Удаляет вебхук
+function telegram_delete_webhook(): array {
+    if (!telegram_enabled()) return ['ok' => false];
+    $url  = 'https://api.telegram.org/bot' . TELEGRAM_BOT_TOKEN . '/deleteWebhook';
+    $ctx  = stream_context_create(['http' => ['method' => 'POST', 'timeout' => 10]]);
+    $result = @file_get_contents($url, false, $ctx);
+    return $result ? json_decode($result, true) : ['ok' => false];
+}
+
+// Информация о текущем вебхуке
+function telegram_get_webhook_info(): array {
+    if (!telegram_enabled()) return ['ok' => false];
+    $url    = 'https://api.telegram.org/bot' . TELEGRAM_BOT_TOKEN . '/getWebhookInfo';
+    $result = @file_get_contents($url);
+    return $result ? json_decode($result, true) : ['ok' => false];
+}
+
+// Пользователи с Telegram, имеющие доступ к видео (кроме автора)
+function telegram_recipients_for_video(int $video_id, int $author_id): array {
+    $stmt = db()->prepare("
+        SELECT u.telegram_chat_id
+        FROM users u
+        WHERE u.telegram_chat_id IS NOT NULL
+          AND u.telegram_notify = 1
+          AND u.is_active = 1
+          AND u.id != :author
+          AND (
+              EXISTS (SELECT 1 FROM video_access va WHERE va.video_id = :vid  AND va.user_id = 0)
+              OR EXISTS (SELECT 1 FROM video_access va WHERE va.video_id = :vid2 AND va.user_id = u.id)
+              OR u.id = (SELECT user_id FROM videos WHERE id = :vid3)
+          )
+    ");
+    $stmt->execute([':vid' => $video_id, ':vid2' => $video_id, ':vid3' => $video_id, ':author' => $author_id]);
+    return $stmt->fetchAll();
+}
+
+// Пользователи с Telegram, имеющие доступ к событию (кроме автора)
+function telegram_recipients_for_event(int $event_id, int $author_id): array {
+    $stmt = db()->prepare("
+        SELECT u.telegram_chat_id
+        FROM users u
+        WHERE u.telegram_chat_id IS NOT NULL
+          AND u.telegram_notify = 1
+          AND u.is_active = 1
+          AND u.id != :author
+          AND (
+              EXISTS (SELECT 1 FROM event_access ea WHERE ea.event_id = :eid  AND ea.user_id = 0)
+              OR EXISTS (SELECT 1 FROM event_access ea WHERE ea.event_id = :eid2 AND ea.user_id = u.id)
+              OR u.id = (SELECT user_id FROM events WHERE id = :eid3)
+          )
+    ");
+    $stmt->execute([':eid' => $event_id, ':eid2' => $event_id, ':eid3' => $event_id, ':author' => $author_id]);
+    return $stmt->fetchAll();
+}
+
+// Пользователи с Telegram, имеющие доступ к медиа (кроме автора)
+function telegram_recipients_for_media(int $media_id, int $author_id): array {
+    $stmt = db()->prepare("
+        SELECT u.telegram_chat_id
+        FROM users u
+        WHERE u.telegram_chat_id IS NOT NULL
+          AND u.telegram_notify = 1
+          AND u.is_active = 1
+          AND u.id != :author
+          AND (
+              EXISTS (SELECT 1 FROM media_access ma WHERE ma.media_id = :mid  AND ma.user_id = 0)
+              OR EXISTS (SELECT 1 FROM media_access ma WHERE ma.media_id = :mid2 AND ma.user_id = u.id)
+              OR u.id = (SELECT user_id FROM media WHERE id = :mid3)
+          )
+    ");
+    $stmt->execute([':mid' => $media_id, ':mid2' => $media_id, ':mid3' => $media_id, ':author' => $author_id]);
+    return $stmt->fetchAll();
+}
+
+// Рассылает уведомление о новом видео
+function telegram_notify_video(int $video_id, int $author_id): void {
+    if (!telegram_enabled()) return;
+    $stmt = db()->prepare("SELECT v.*, COALESCE(u.display_name, '?') as author_name FROM videos v LEFT JOIN users u ON u.id = v.user_id WHERE v.id = ?");
+    $stmt->execute([$video_id]);
+    $video = $stmt->fetch();
+    if (!$video) return;
+    $recipients = telegram_recipients_for_video($video_id, $author_id);
+    if (empty($recipients)) return;
+
+    $text  = "🎬 <b>" . htmlspecialchars($video['title'], ENT_QUOTES) . "</b>\n";
+    if ($video['filmed_at']) $text .= "📅 " . date('d.m.Y', strtotime($video['filmed_at'])) . "\n";
+    if ($video['location'])  $text .= "📍 " . htmlspecialchars($video['location'], ENT_QUOTES) . "\n";
+    $text .= "👤 " . htmlspecialchars($video['author_name'], ENT_QUOTES) . "\n";
+    $text .= SITE_URL . "/video.php?id=" . $video_id;
+
+    foreach ($recipients as $r) {
+        telegram_send((int)$r['telegram_chat_id'], $text);
+    }
+}
+
+// Рассылает уведомление о новом событии
+function telegram_notify_event(int $event_id, int $author_id): void {
+    if (!telegram_enabled()) return;
+    $stmt = db()->prepare("SELECT e.*, COALESCE(u.display_name, '?') as author_name FROM events e LEFT JOIN users u ON u.id = e.user_id WHERE e.id = ?");
+    $stmt->execute([$event_id]);
+    $event = $stmt->fetch();
+    if (!$event) return;
+    $recipients = telegram_recipients_for_event($event_id, $author_id);
+    if (empty($recipients)) return;
+
+    $text  = "📅 <b>" . htmlspecialchars($event['title'], ENT_QUOTES) . "</b>\n";
+    if ($event['event_date'])   $text .= "🗓 " . date('d.m.Y', strtotime($event['event_date'])) . "\n";
+    if ($event['description'])  $text .= htmlspecialchars(mb_substr($event['description'], 0, 120), ENT_QUOTES) . "\n";
+    $text .= "👤 " . htmlspecialchars($event['author_name'], ENT_QUOTES) . "\n";
+    $text .= SITE_URL . "/event.php?id=" . $event_id;
+
+    foreach ($recipients as $r) {
+        telegram_send((int)$r['telegram_chat_id'], $text);
+    }
+}
+
+// Рассылает уведомление о новом медиа
+function telegram_notify_media(int $media_id, int $event_id, int $author_id): void {
+    if (!telegram_enabled()) return;
+    $stmt = db()->prepare("
+        SELECT m.*, COALESCE(u.display_name, '?') as author_name, e.title as event_title
+        FROM media m
+        LEFT JOIN users u ON u.id = m.user_id
+        LEFT JOIN events e ON e.id = m.event_id
+        WHERE m.id = ?
+    ");
+    $stmt->execute([$media_id]);
+    $media = $stmt->fetch();
+    if (!$media) return;
+    $recipients = telegram_recipients_for_media($media_id, $author_id);
+    if (empty($recipients)) return;
+
+    $emoji = match($media['type']) { 'photo' => '📷', 'album' => '🖼', default => '🔗' };
+    $title = $media['title'] ?: $media['url'];
+
+    $text  = "$emoji <b>" . htmlspecialchars(mb_substr($title, 0, 80), ENT_QUOTES) . "</b>\n";
+    $text .= "🎉 " . htmlspecialchars($media['event_title'], ENT_QUOTES) . "\n";
+    $text .= "👤 " . htmlspecialchars($media['author_name'], ENT_QUOTES) . "\n";
+    $text .= SITE_URL . "/event.php?id=" . $event_id;
+
+    foreach ($recipients as $r) {
+        telegram_send((int)$r['telegram_chat_id'], $text);
+    }
+}

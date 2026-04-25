@@ -74,6 +74,34 @@ return [
     'profile_err_passmin'=> 'Новый пароль минимум 4 символа.',
     'profile_err_passmatch'=> 'Пароли не совпадают.',
 
+    // Telegram
+    'tg_section'        => 'Telegram-уведомления',
+    'tg_connected'      => 'Подключён — уведомления активны',
+    'tg_not_connected'  => 'Не подключён. Нажмите кнопку ниже — откроется Telegram, нажмите START.',
+    'tg_connect_btn'    => 'Подключить Telegram',
+    'tg_connect_hint'   => 'Ссылка действует 24 часа. Если истекла — нажмите снова.',
+    'tg_disconnect_btn' => 'Отключить уведомления',
+    'tg_disconnected'   => 'Telegram отключён.',
+
+    // Telegram — admin
+    'admin_tg_section'          => 'Telegram-бот',
+    'admin_tg_webhook_status'   => 'Статус вебхука',
+    'admin_tg_webhook_active'   => 'Активен',
+    'admin_tg_webhook_none'     => 'Не установлен',
+    'admin_tg_webhook_mismatch' => 'URL вебхука не совпадает с ожидаемым — нажмите «Установить вебхук»',
+    'admin_tg_set_webhook'      => 'Установить вебхук',
+    'admin_tg_del_webhook'      => 'Удалить вебхук',
+    'admin_tg_webhook_set_ok'   => 'Вебхук установлен.',
+    'admin_tg_webhook_set_err'  => 'Ошибка установки вебхука',
+    'admin_tg_webhook_del_ok'   => 'Вебхук удалён.',
+    'admin_tg_webhook_del_err'  => 'Ошибка удаления вебхука.',
+    'admin_tg_users'            => 'Подключённые пользователи',
+    'admin_tg_no_users'         => 'Никто ещё не подключил Telegram.',
+    'admin_tg_test_btn'         => 'Тест',
+    'admin_tg_test_msg'         => 'Тестовое сообщение',
+    'admin_tg_test_ok'          => 'Сообщение отправлено пользователю %s.',
+    'admin_tg_test_err'         => 'Не удалось отправить сообщение.',
+
     // Страница события
     'event_back'            => '← События',
     'event_edit'            => 'Редактировать',

@@ -30,3 +30,11 @@ define('SITE_URL', 'https://your-domain.com');
 // ----- Секретный ключ / Secret key ---------------------------
 // Любая случайная строка / Any random string
 define('SECRET_KEY', 'change-this-to-random-string-xyz123');
+
+// ----- Telegram-бот (необязательно) / Telegram bot (optional) ----
+// Создайте бота через @BotFather в Telegram
+// Create a bot via @BotFather in Telegram
+// Если оставить пустым — функция уведомлений отключена
+// If left empty — notification feature is disabled
+define('TELEGRAM_BOT_TOKEN',    '');   // Токен от @BotFather / Token from @BotFather
+define('TELEGRAM_BOT_USERNAME', '');   // Без @ / Without @, e.g.: myfamilybot

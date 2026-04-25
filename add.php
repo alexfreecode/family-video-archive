@@ -57,6 +57,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $vid = db()->lastInsertId();
         save_video_access((int)$vid, $atype, $uids);
         save_video_participants((int)$vid, $part_ids, $ext_parts);
+        telegram_notify_video((int)$vid, $user['id']);
         header('Location: index.php?tab=mine');
         exit;
         }
