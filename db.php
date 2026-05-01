@@ -111,7 +111,7 @@ function other_users(int $exclude_id): array {
 }
 
 function all_users(): array {
-    return db()->query("SELECT id, username, display_name, color, is_admin, is_active, last_seen FROM users ORDER BY display_name")->fetchAll();
+    return db()->query("SELECT id, username, display_name, color, is_admin, is_active, last_seen, telegram_chat_id, telegram_connected_at FROM users ORDER BY display_name")->fetchAll();
 }
 
 function get_videos_for_user(int $user_id, string $search = '', string $sort = 'filmed', string $order = 'desc'): array {

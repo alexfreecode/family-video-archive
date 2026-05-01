@@ -167,9 +167,6 @@ layout_head(t('profile_title'), false);
           <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.248l-2.007 9.456c-.148.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12L7.26 14.4l-2.95-.924c-.641-.2-.654-.641.136-.953l11.527-4.444c.533-.194 1.002.13.59.17z"/></svg>
           <?= h(t('tg_connect_btn')) ?>
         </a>
-        <div style="font-size:0.75rem;color:var(--text-muted);margin-top:0.6rem">
-          <?= h(t('tg_connect_hint')) ?>
-        </div>
       <?php endif; ?>
     </div>
     <?php endif; ?>
