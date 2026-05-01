@@ -58,7 +58,7 @@ Log in as administrator → go to **Family management** → create invite codes 
 - 👥 Video participants (archive members + external people)
 - 🔔 "What's new" bell — shows additions since last visit
 - 💬 Comments on videos and events
-- 🌍 Interface languages: Russian, English, Ukrainian, Polish, Spanish, Portuguese, German
+- 🌍 Interface languages: English, German, Polish, Portuguese, Russian, Spanish, Ukrainian
 - 🌗 Dark / light theme
 - 🔒 Invite-only registration, access control per video/event/media
 - 📱 Mobile-friendly (Bootstrap 5)

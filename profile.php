@@ -114,13 +114,13 @@ layout_head(t('profile_title'), false);
         <?php
           $cur_lang = $user['language'] ?? current_lang();
           $langs = [
-            'ru' => 'Русский',
             'en' => 'English',
-            'uk' => 'Українська',
-            'pl' => 'Polski',
-            'es' => 'Español',
-            'pt' => 'Português',
             'de' => 'Deutsch',
+            'pl' => 'Polski',
+            'pt' => 'Português',
+            'ru' => 'Русский',
+            'es' => 'Español',
+            'uk' => 'Українська',
           ];
         ?>
         <div style="display:flex;flex-direction:column;gap:0.5rem;margin-top:0.3rem">
