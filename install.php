@@ -1,38 +1,38 @@
 <?php
 /**
- * install.php — первоначальная настройка архива
- * После успешной установки предложит удалить этот файл.
- * Для повторного тестирования просто загрузите файл снова.
+ * install.php — initial setup for the archive
+ * After successful installation it will offer to delete this file.
+ * To re-run the installer simply upload the file again.
  */
 
 $step   = 'check'; // check → install → done
 $errors = [];
 $info   = [];
 
-// ── Шаг: проверка окружения ───────────────────────────────────────────────
+// ── Step: environment check ───────────────────────────────────────────────
 function check_env(): array {
     $errors = [];
     if (!file_exists(__DIR__ . '/config.php')) {
-        $errors[] = 'Файл <strong>config.php</strong> не найден. Скопируйте <code>config.example.php</code> → <code>config.php</code> и заполните данные.';
+        $errors[] = 'File <strong>config.php</strong> not found. Copy <code>config.example.php</code> → <code>config.php</code> and fill in your details.';
     }
     if (!extension_loaded('pdo_mysql')) {
-        $errors[] = 'Расширение PHP <strong>pdo_mysql</strong> не загружено.';
+        $errors[] = 'PHP extension <strong>pdo_mysql</strong> is not loaded.';
     }
     if (!extension_loaded('gd')) {
-        $errors[] = 'Расширение PHP <strong>GD</strong> не загружено (нужно для превью).';
+        $errors[] = 'PHP extension <strong>GD</strong> is not loaded (required for thumbnails).';
     }
     $uploads = __DIR__ . '/uploads/thumbnails';
     if (!is_dir($uploads)) {
         if (!mkdir($uploads, 0755, true)) {
-            $errors[] = 'Не удалось создать папку <strong>uploads/thumbnails/</strong>. Создайте вручную и дайте права 755.';
+            $errors[] = 'Could not create folder <strong>uploads/thumbnails/</strong>. Create it manually and set permissions to 755.';
         }
     } elseif (!is_writable($uploads)) {
-        $errors[] = 'Папка <strong>uploads/thumbnails/</strong> не доступна для записи. Дайте права 755.';
+        $errors[] = 'Folder <strong>uploads/thumbnails/</strong> is not writable. Set permissions to 755.';
     }
     return $errors;
 }
 
-// ── Шаг: подключение к БД ────────────────────────────────────────────────
+// ── Step: database connection ─────────────────────────────────────────────
 function try_connect(): ?PDO {
     if (!file_exists(__DIR__ . '/config.php')) return null;
     require_once __DIR__ . '/config.php';
@@ -48,7 +48,7 @@ function try_connect(): ?PDO {
     }
 }
 
-// ── Шаг: проверка — уже установлено? ─────────────────────────────────────
+// ── Step: check if already installed ─────────────────────────────────────
 function is_installed(PDO $pdo): bool {
     try {
         $pdo->query("SELECT 1 FROM users LIMIT 1");
@@ -58,7 +58,7 @@ function is_installed(PDO $pdo): bool {
     }
 }
 
-// ── Обработка формы установки ─────────────────────────────────────────────
+// ── Handle install form ───────────────────────────────────────────────────
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['install'])) {
     $step = 'install';
 
@@ -67,10 +67,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['install'])) {
     $pass   = $_POST['password'] ?? '';
     $pass2  = $_POST['password2'] ?? '';
 
-    if (!$name)              $errors[] = 'Введите имя администратора.';
-    if (!$login)             $errors[] = 'Введите логин.';
-    if (strlen($pass) < 4)  $errors[] = 'Пароль — минимум 4 символа.';
-    if ($pass !== $pass2)   $errors[] = 'Пароли не совпадают.';
+    if (!$name)              $errors[] = 'Please enter the administrator name.';
+    if (!$login)             $errors[] = 'Please enter a username.';
+    if (strlen($pass) < 4)  $errors[] = 'Password must be at least 4 characters.';
+    if ($pass !== $pass2)   $errors[] = 'Passwords do not match.';
 
     $env_errors = check_env();
     $errors = array_merge($errors, $env_errors);
@@ -78,7 +78,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['install'])) {
     if (empty($errors)) {
         $pdo = try_connect();
         if (!$pdo) {
-            $errors[] = 'Не удалось подключиться к базе данных. Проверьте config.php.';
+            $errors[] = 'Could not connect to the database. Please check config.php.';
         } else {
             try {
                 $tables = [
@@ -95,8 +95,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['install'])) {
                       `reset_code`    varchar(10)  DEFAULT NULL,
                       `reset_expires` datetime     DEFAULT NULL,
                       `is_active`     tinyint(1)   NOT NULL DEFAULT 1,
-                      `last_seen`     datetime     DEFAULT NULL,
-                      `prev_seen`     datetime     DEFAULT NULL,
+                      `last_seen`             datetime     DEFAULT NULL,
+                      `prev_seen`             datetime     DEFAULT NULL,
+                      `telegram_chat_id`      bigint(20)   DEFAULT NULL,
+                      `telegram_notify`       tinyint(1)   NOT NULL DEFAULT 1,
+                      `telegram_connected_at` datetime     DEFAULT NULL,
+                      `telegram_link_code`    varchar(32)  DEFAULT NULL,
+                      `telegram_link_expires` datetime     DEFAULT NULL,
                       PRIMARY KEY (`id`),
                       UNIQUE KEY `username` (`username`)
                     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci",
@@ -245,16 +250,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['install'])) {
                 }
                 $pdo->exec('SET FOREIGN_KEY_CHECKS=1');
 
-                // Создаём администратора
+                // Create administrator account
                 $hash = password_hash($pass, PASSWORD_DEFAULT);
                 $pdo->prepare(
-                    "INSERT INTO users (username, display_name, password, color, is_admin, is_active)
-                     VALUES (?, ?, ?, '#c9a84c', 1, 1)"
+                    "INSERT INTO users (username, display_name, password, color, is_admin, is_active, language)
+                     VALUES (?, ?, ?, '#c9a84c', 1, 1, 'en')"
                 )->execute([$login, $name, $hash]);
 
                 $step = 'done';
             } catch (Exception $e) {
-                $errors[] = 'Ошибка при создании таблиц: ' . htmlspecialchars($e->getMessage());
+                $errors[] = 'Error creating tables: ' . htmlspecialchars($e->getMessage());
             }
         }
     }
@@ -262,7 +267,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['install'])) {
     if (!empty($errors)) $step = 'check';
 }
 
-// ── Предварительная проверка для отображения формы ───────────────────────
+// ── Pre-check for form display ────────────────────────────────────────────
 $pre_errors = [];
 $db_ok      = false;
 $installed  = false;
@@ -275,12 +280,12 @@ if ($step === 'check' && $_SERVER['REQUEST_METHOD'] !== 'POST') {
         $installed = is_installed($pdo);
     } else {
         if (file_exists(__DIR__ . '/config.php')) {
-            $pre_errors[] = 'Не удалось подключиться к базе данных. Проверьте данные в config.php.';
+            $pre_errors[] = 'Could not connect to the database. Please check the credentials in config.php.';
         }
     }
 }
 
-// ── Удаление файла ────────────────────────────────────────────────────────
+// ── Delete installer file ─────────────────────────────────────────────────
 if (isset($_GET['delete_installer']) && $_GET['delete_installer'] === '1') {
     if (@unlink(__FILE__)) {
         header('Location: index.php');
@@ -289,11 +294,11 @@ if (isset($_GET['delete_installer']) && $_GET['delete_installer'] === '1') {
 }
 ?>
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Установка архива</title>
+<title>Archive Setup</title>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
 <style>
 :root { --bg:#0f0e0c; --surface:#1a1814; --gold:#c9a84c; --gold-light:#e8c97a; --text:#e8e2d4; --text-muted:#8a8070; --border:#2e2a22; }
@@ -318,8 +323,8 @@ h1 { font-size:1.3rem; font-weight:700; color:var(--gold); margin:0 0 0.25rem; }
 <body>
 <div class="box">
 
-  <h1>📦 Установка архива</h1>
-  <div class="subtitle">первоначальная настройка</div>
+  <h1>📦 Archive Setup</h1>
+  <div class="subtitle">initial configuration</div>
 
   <?php if ($step === 'check'): ?>
 
@@ -331,41 +336,41 @@ h1 { font-size:1.3rem; font-weight:700; color:var(--gold); margin:0 0 0.25rem; }
     <?php endforeach; ?>
 
     <?php if (empty($pre_errors)): ?>
-      <div class="ok">✓ config.php найден</div>
+      <div class="ok">✓ config.php found</div>
       <?php if ($db_ok): ?>
-        <div class="ok">✓ Подключение к базе данных успешно</div>
+        <div class="ok">✓ Database connection successful</div>
       <?php endif; ?>
       <?php if ($installed): ?>
-        <div class="warn">⚠ База данных уже содержит таблицу users. Повторная установка пересоздаст таблицы (данные не сотрёт — используется IF NOT EXISTS).</div>
+        <div class="warn">⚠ The database already contains a <strong>users</strong> table. Re-running the installer will recreate all tables (existing data is preserved — <code>IF NOT EXISTS</code> is used).</div>
       <?php endif; ?>
     <?php endif; ?>
 
     <?php if (empty($pre_errors) && $db_ok): ?>
     <hr class="sep">
-    <p style="font-size:0.85rem;color:var(--text-muted);margin-bottom:1.2rem">Создайте учётную запись администратора:</p>
+    <p style="font-size:0.85rem;color:var(--text-muted);margin-bottom:1.2rem">Create the administrator account:</p>
     <form method="POST">
       <div class="mb-3">
-        <label class="form-label">Имя (отображается)</label>
-        <input type="text" name="display_name" class="form-control" placeholder="Алекс" autofocus
+        <label class="form-label">Display name</label>
+        <input type="text" name="display_name" class="form-control" placeholder="Alex" autofocus
                value="<?= htmlspecialchars($_POST['display_name'] ?? '') ?>">
       </div>
       <div class="mb-3">
-        <label class="form-label">Логин</label>
+        <label class="form-label">Username</label>
         <input type="text" name="username" class="form-control" placeholder="alex"
                value="<?= htmlspecialchars($_POST['username'] ?? '') ?>"
                autocomplete="username">
       </div>
       <div class="mb-3">
-        <label class="form-label">Пароль</label>
+        <label class="form-label">Password</label>
         <input type="password" name="password" class="form-control"
-               placeholder="минимум 4 символа" autocomplete="new-password">
+               placeholder="at least 4 characters" autocomplete="new-password">
       </div>
       <div class="mb-3">
-        <label class="form-label">Повторите пароль</label>
+        <label class="form-label">Confirm password</label>
         <input type="password" name="password2" class="form-control" autocomplete="new-password">
       </div>
       <button type="submit" name="install" value="1" class="btn-gold" style="width:100%;margin-top:0.5rem">
-        Установить →
+        Install →
       </button>
     </form>
     <?php endif; ?>
@@ -373,24 +378,24 @@ h1 { font-size:1.3rem; font-weight:700; color:var(--gold); margin:0 0 0.25rem; }
   <?php elseif ($step === 'done'): ?>
 
     <div class="ok" style="font-size:0.9rem;padding:0.9rem">
-      ✅ Установка завершена успешно!<br>
-      <span style="color:var(--text-muted);font-size:0.82rem">Таблицы созданы, администратор добавлен.</span>
+      ✅ Installation completed successfully!<br>
+      <span style="color:var(--text-muted);font-size:0.82rem">Tables created, administrator account added.</span>
     </div>
 
     <div style="margin:1.5rem 0;font-size:0.85rem;color:var(--text-muted);line-height:1.6">
-      Теперь вы можете <a href="login.php" style="color:var(--gold)">войти в систему</a> с указанными данными.
+      You can now <a href="login.php" style="color:var(--gold)">log in</a> with the credentials you just created.
     </div>
 
     <hr class="sep">
     <p style="font-size:0.85rem;color:var(--text-muted);margin-bottom:1rem">
-      Удалить этот файл с сервера?
+      Delete this file from the server?
     </p>
     <div style="display:flex;gap:0.8rem;flex-wrap:wrap">
-      <a href="?delete_installer=1" class="btn-danger-soft">🗑 Удалить install.php</a>
-      <a href="login.php" class="btn-gold" style="text-decoration:none">Войти →</a>
+      <a href="?delete_installer=1" class="btn-danger-soft">🗑 Delete install.php</a>
+      <a href="login.php" class="btn-gold" style="text-decoration:none">Log in →</a>
     </div>
     <p style="font-size:0.75rem;color:var(--text-muted);margin-top:0.8rem">
-      Если оставить файл — можно будет запустить установку повторно для тестирования.
+      If you keep the file, you can re-run the installer at any time for testing.
     </p>
 
   <?php endif; ?>
