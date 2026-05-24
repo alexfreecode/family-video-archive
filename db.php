@@ -104,6 +104,16 @@ function current_user(): ?array {
     return $stmt->fetch() ?: null;
 }
 
+/**
+ * Returns true if demo mode is active AND current user is not admin.
+ * Admin always bypasses demo restrictions.
+ */
+function is_demo_restricted(): bool {
+    if (!defined('DEMO_MODE') || !DEMO_MODE) return false;
+    $user = current_user();
+    return !($user && $user['is_admin']);
+}
+
 function other_users(int $exclude_id): array {
     $stmt = db()->prepare("SELECT id, display_name, color FROM users WHERE id != ? ORDER BY display_name");
     $stmt->execute([$exclude_id]);

@@ -6,6 +6,7 @@ if (!isset($_SESSION['user_id'])) { header('Location: login.php'); exit; }
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') { header('Location: index.php'); exit; }
 csrf_verify();
 $user = current_user();
+if (is_demo_restricted()) { header('Location: index.php'); exit; }
 $id   = (int)($_POST['id'] ?? 0);
 $stmt = db()->prepare("SELECT user_id FROM videos WHERE id = ?");
 $stmt->execute([$id]);

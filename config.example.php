@@ -50,3 +50,10 @@ define('TELEGRAM_MODE', 'poll');
 // Secret key to trigger the poll script via URL (cron)
 // Любая случайная строка / Any random string
 define('TELEGRAM_POLL_KEY', 'change-this-to-random-string');
+
+// ----- Демо-режим / Demo mode --------------------------------
+// Включить для публичного демо-сайта. Все пользователи кроме администратора
+// смогут просматривать архив, но не смогут сохранять изменения.
+// Enable for a public demo site. All users except the administrator
+// can browse the archive but cannot save any changes.
+// define('DEMO_MODE', true);

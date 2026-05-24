@@ -42,6 +42,9 @@ $error  = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     csrf_verify();
+    if (is_demo_restricted()) {
+        $error = 'Demo mode — data is not saved.';
+    } else {
     $type       = $_POST['type'] ?? 'link';
     $url        = trim($_POST['url'] ?? '');
     $title      = trim($_POST['title'] ?? '');
@@ -101,6 +104,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             exit;
         }
     }
+    } // end !is_demo_restricted
 }
 
 require_once __DIR__ . '/layout.php';

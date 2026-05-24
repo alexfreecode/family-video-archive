@@ -23,6 +23,9 @@ $error  = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     csrf_verify();
+    if (is_demo_restricted()) {
+        $error = 'Demo mode — data is not saved.';
+    } else {
     $title      = trim($_POST['title'] ?? '');
     $event_date = trim($_POST['event_date'] ?? '');
     $desc       = trim($_POST['description'] ?? '');
@@ -108,6 +111,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             exit;
         }
     }
+    } // end !is_demo_restricted
 }
 
 // Текущий доступ

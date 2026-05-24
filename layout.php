@@ -426,6 +426,11 @@ function layout_nav(?array $user, string $active_tab = 'all'): void {
   <a href="events.php" class="<?= $active_tab === 'events' ? 'active' : '' ?>"><?= h(t('nav_events')) ?></a>
   <a href="add.php" style="margin-left:auto; color:var(--gold)"><?= h(t('nav_add')) ?></a>
 </div>
+<?php if (defined('DEMO_MODE') && DEMO_MODE && !($user['is_admin'] ?? false)): ?>
+<div style="background:rgba(201,168,76,.12);border-bottom:1px solid rgba(201,168,76,.25);padding:0.35rem 1.5rem;font-size:0.78rem;color:var(--gold);text-align:center">
+  🎭 Demo mode — you can explore everything, but changes are not saved
+</div>
+<?php endif; ?>
     <?php
 }
 
@@ -453,6 +458,49 @@ function layout_foot(): void {
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+<?php
+// Demo toast injected only for restricted users
+$_demo_js = false;
+if (defined('DEMO_MODE') && DEMO_MODE && isset($_SESSION['user_id'])) {
+    $u = db()->prepare("SELECT is_admin FROM users WHERE id=?");
+    $u->execute([$_SESSION['user_id']]);
+    $row = $u->fetch();
+    $_demo_js = !($row && $row['is_admin']);
+}
+if ($_demo_js): ?>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Build toast element
+  var toastEl = document.createElement('div');
+  toastEl.id = 'demoToast';
+  toastEl.setAttribute('role', 'alert');
+  toastEl.style.cssText = 'position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%);z-index:9999;background:rgba(201,168,76,0.96);color:#0f0e0c;border-radius:4px;padding:0.75rem 1.4rem;font-size:0.85rem;font-weight:700;box-shadow:0 4px 20px rgba(0,0,0,.5);display:none;white-space:nowrap';
+  toastEl.textContent = '🎭 Demo mode — changes are not saved';
+  document.body.appendChild(toastEl);
+
+  function showDemoToast() {
+    toastEl.style.display = 'block';
+    toastEl.style.opacity = '1';
+    clearTimeout(toastEl._t);
+    toastEl._t = setTimeout(function() {
+      toastEl.style.transition = 'opacity 0.4s';
+      toastEl.style.opacity = '0';
+      setTimeout(function() { toastEl.style.display = 'none'; toastEl.style.transition = ''; }, 400);
+    }, 3000);
+  }
+
+  // Intercept all POST form submissions except those marked data-demo-ok
+  document.querySelectorAll('form').forEach(function(form) {
+    if (form.method.toLowerCase() === 'get') return;
+    if (form.dataset.demoOk !== undefined) return;
+    form.addEventListener('submit', function(e) {
+      e.preventDefault();
+      showDemoToast();
+    });
+  });
+});
+</script>
+<?php endif; ?>
 <script>
 // Watch modal
 function watchVideo(ytId, title, meta) {

@@ -7,6 +7,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') { header('Location: events.php'); exi
 csrf_verify();
 $user = current_user();
 if (!$user) { session_destroy(); header('Location: login.php'); exit; }
+if (is_demo_restricted()) { header('Location: events.php'); exit; }
 
 $id = (int)($_POST['id'] ?? 0);
 if (!$id) { header('Location: events.php'); exit; }

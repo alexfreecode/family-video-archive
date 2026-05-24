@@ -25,10 +25,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     csrf_verify();
 
     if (isset($_POST['action']) && $_POST['action'] === 'telegram_disconnect') {
-        telegram_disconnect($user['id']);
-        $success = t('tg_disconnected');
-        $user = current_user();
+        if (is_demo_restricted()) {
+            $error = 'Demo mode — changes are not saved.';
+        } else {
+            telegram_disconnect($user['id']);
+            $success = t('tg_disconnected');
+            $user = current_user();
+        }
     } elseif (isset($_POST['action']) && $_POST['action'] === 'change_pass') {
+        if (is_demo_restricted()) {
+            $error = 'Demo mode — changes are not saved.';
+        } else {
         $old  = $_POST['old_pass'] ?? '';
         $new  = $_POST['new_pass'] ?? '';
         $new2 = $_POST['new_pass2'] ?? '';
@@ -42,6 +49,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             db()->prepare("UPDATE users SET password=? WHERE id=?")->execute([password_hash($new, PASSWORD_DEFAULT), $user['id']]);
             $success = t('profile_ok_pass');
         }
+        } // end !is_demo_restricted
     } elseif (!isset($_POST['action'])) {
         $theme = $_POST['theme'] ?? 'dark';
         save_user_theme($user['id'], $theme);
@@ -85,7 +93,7 @@ layout_head(t('profile_title'), false);
     </div>
 
     <!-- Настройки -->
-    <form method="POST">
+    <form method="POST" data-demo-ok>
       <?= csrf_field() ?>
       <div style="font-size:0.75rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-muted);font-weight:600;margin-bottom:1rem">
         <?= h(t('profile_settings')) ?>
