@@ -76,7 +76,7 @@ body { background:var(--bg); color:var(--text); font-family:'Segoe UI',system-ui
   <div style="background:rgba(201,168,76,.12);border:1px solid rgba(201,168,76,.3);border-radius:3px;padding:0.65rem 0.9rem;margin-bottom:1rem;font-size:0.82rem;color:var(--gold)">
     🎭 <strong>Demo</strong> &nbsp;
     <?= h(t('login_label_user')) ?>: <strong>demo</strong> &nbsp;·&nbsp;
-    <?= h(t('login_label_pass')) ?>: <strong>demo123</strong>
+    <?= h(t('login_label_pass')) ?>: <strong>demo1234</strong>
   </div>
   <?php endif; ?>
   <?php if ($error): ?><div class="err"><?= h($error) ?></div><?php endif; ?>
